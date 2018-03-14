@@ -1,0 +1,40 @@
+
+@color-primary:#409eff;
+@color-danger:#f56c6c;
+@color-success:#67C23A;
+@color-info:#909399;
+@color-text-primary:#333;
+@color-text-regular:#666;
+@color-text-secondary:#999;
+@color-text-placeholder:#ccc;
+@color-border-base:#dcdfe6;
+@color-border-light:#e4e7ed;
+@color-border-lighter:#ebeef5;
+@color-border-lightest:#f2f6fc;
+
+.text(primary) { color:@color-primary; }
+.text(danger)  { color:@color-danger; }
+.text(success) { color:@color-success; }
+.text(info)    { color:@color-info; }
+.text(placeholder) { color:@color-text-placeholder; }
+
+// 缩略
+.text-ellipsis() { text-overflow:ellipsis; white-space: nowrap; }
+
+// 布局
+.flex         { display:flex; flex-direction:column; }
+.flex-dir-row { .flex; flex-direction:row; }
+.flex-dir-col { .flex; }
+.flex(@n)     { flex:@n; }
+.flex-wrap()  { flex-wrap:wrap; }
+
+.justify(c)  { justify-content:center; }
+.justify(fs) { justify-content:flex-start; }
+.justify(fe) { justify-content:flex-end; }
+.justify(sb) { justify-content:space-between; }
+.justify(sa) { justify-content:space-around; }
+
+.align(s)  { align-items:stretch; }
+.align(c)  { align-items:center; }
+.align(fs) { align-items:flex-start; }
+.align(fe) { align-items:flex-end; }
