@@ -1,14 +1,37 @@
-
-
 @import url(~assets/css/variable.less);
 
 
+// 全局
+* { margin:0; padding:0; font:inherit; color:inherit; box-sizing:border-box; }
+body { font:normal 14px/1 sans-serif; color:@color-text-regular; }
 
-input[type=text], input[type=button] { 
-  border:0 none; -webkit-appearance:none; 
+
+
+// 标签
+ul { list-style:none; }
+a, input { 
+  outline:0 none;
+  text-decoration:none;
+  -webkit-tap-highlight-color:rgba(0, 0, 0, 0);  
+  -moz-tap-highlight-color:rgba(0, 0, 0, 0);  
+  -ms-tap-highlight-color:rgba(0, 0, 0, 0);  
+  -o-tap-highlight-color:rgba(0, 0, 0, 0);  
+}
+input[type=text], input[type=button], input[type=submit], button { 
+  border:0 none; 
+  -webkit-appearance:none; 
 }
 
+
+
+// 类
 .button { width:60px; height:30px; text-align:center; }
 .button.block   { display:block; margin:0 auto; }
 .button.primary { color:#fff; background-color:@color-primary; }
 .button.regular { background-color:@color-border-base; }
+
+
+
+
+// 布局
+.page-container { position:relative; z-index:10; min-height:100vh; }

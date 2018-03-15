@@ -1,8 +1,5 @@
 <style lang="less">
-  @import url(~assets/css/variable.less);
-  * { margin:0; padding:0; color:inherit; }
-  body { font:14px/1 sans-serif; color:@color-text-regular; }
-  .page-container { position:relative; z-index:10; min-height:100vh; }
+  // @import url(~assets/css/variable.less);
 </style>
 
 <template>
@@ -12,6 +9,10 @@
 </template>
 
 <script>
+import Vue from 'vue'
+import axios from '~/plugins/axios'
+Vue.prototype.$http = axios
+
 export default {
   components: {}
 }

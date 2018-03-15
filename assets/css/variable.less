@@ -22,11 +22,12 @@
 .text-ellipsis() { text-overflow:ellipsis; white-space: nowrap; }
 
 // 布局
-.flex()         { display:flex; flex-direction:column; }
-.flex-dir-row() { .flex; flex-direction:row; }
-.flex-dir-col() { .flex; }
-.flex(@n)     { flex:@n; }
-.flex-wrap()  { flex-wrap:wrap; }
+// .flex()         { display:flex; flex-direction:column; }
+.flex(@n)       { flex:@n; }
+.flow(@d:row,@w:nowrap,@j:flex-start,@a:flex-start) { 
+  display:flex; flex-flow:@d @w;
+  justify-content:@j; align-items:@a;
+}
 
 .justify(c)  { justify-content:center; }
 .justify(fs) { justify-content:flex-start; }
@@ -38,3 +39,9 @@
 .align(c)  { align-items:center; }
 .align(fs) { align-items:flex-start; }
 .align(fe) { align-items:flex-end; }
+
+
+.scroll() {
+  overflow:auto;
+  -webkit-overflow-scrolling:touch;
+}
