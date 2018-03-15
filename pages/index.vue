@@ -13,11 +13,14 @@
       margin:20px;
       height:calc(~"100vh - 20px * 2");
       border-radius:5px;
-      .scroll;
+      // .scroll;
+      overflow:hidden;
     }
     .inner-wrapper {
       position:relative;
       background-color:#fff;
+      height:100%;
+      .scroll;
     }
     h3 { padding:@gap-s @gap-n; background-color:@color-border-lighter; }
     #hot-cities {
@@ -36,7 +39,7 @@
       }
     }
     #anchors { 
-      position:absolute; right:@gap-outer; top:50%; transform:translate3d(0,-50%,0);
+      position:absolute; right:0; top:50%; transform:translate3d(0,-50%,0);
       li {
         width:30px; height:30px; line-height:30px; text-align:center;
       }
