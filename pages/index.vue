@@ -3,6 +3,9 @@
   .dialog-container { 
     position:fixed; top:0; left:0; z-index:100; width:100vw; height:100vh; 
     background-color: rgba(0,0,0,.3);
+    transition-duration:300ms;
+    pointer-events:none; opacity:0;
+    &.show { pointer-events:auto; opacity:1; }
   }
   #dialog-cities {
     @gap-s:5px;
@@ -10,23 +13,23 @@
     @gap-outer:20px;
     .outer-wrapper {
       position:relative;
-      margin:20px;
-      height:calc(~"100vh - 20px * 2");
-      border-radius:5px;
-      // .scroll;
+      // height:calc(~"100vh - 20px * 2");
+      height:100%;
       overflow:hidden;
     }
     .inner-wrapper {
       position:relative;
       background-color:#fff;
+      padding:25px 0;
       height:100%;
       .scroll;
     }
-    h3 { padding:@gap-s @gap-n; background-color:@color-border-lighter; }
+    h3 { padding:0 @gap-n; line-height:26px; background-color:@color-border-lighter; }
     #hot-cities {
       ul { 
-        .flow(row,wrap); padding:@gap-s 0; border-bottom:1px solid @color-border-base;
-        li { margin:3px @gap-s; padding:@gap-s @gap-n; border-radius:@gap-n; border:1px solid @color-border-light; }
+        .flow(row,wrap); padding:@gap-s 0; 
+        // border-bottom:1px solid @color-border-base;
+        li { margin:@gap-s 7px; padding:@gap-s @gap-n; border-radius:@gap-n; border:1px solid @color-border-light; }
       }
     }
     #all-cities {
@@ -42,19 +45,21 @@
       position:absolute; right:0; top:50%; transform:translate3d(0,-50%,0);
       li {
         width:30px; height:30px; line-height:30px; text-align:center;
+        font-size:12px; border-radius:15px;
+        color:@color-text-secondary;
       }
     }
   }
 </style>
 <template>
-  <div id="page-home">
-    <div id="dialog-cities" class="dialog-container">
+  <div id="page-home" @click="cityDialog.show=true">
+    <div id="dialog-cities" class="dialog-container" :class="cityDialog.show?'show':''">
       <div class="outer-wrapper">
         <div class="inner-wrapper">
           <div id="hot-cities">
             <h3>热门城市</h3>
             <ul class="list">
-              <li v-for="(c,i) in hotCities" :key="`hc${i}`" @click="selectCity(c.cityId)">
+              <li v-for="(c,i) in hotCities" :key="`hc${i}`" @click.stop="selectCity(c.cityId)">
                 {{c.cityName}}
               </li>
             </ul>
@@ -63,7 +68,7 @@
             <template v-for="(s,i) in cities">
               <h3 :ref="`letter-${s.letter}`" :key="`act${i}`">{{s.letter}}</h3>
               <ul class="list" :key="`acl${i}`">
-                <li v-for="(c,j) in s.data" :key="`acc${j}`" @click="selectCity(c.id)">
+                <li v-for="(c,j) in s.data" :key="`acc${j}`" @click.stop="selectCity(c.id)">
                   {{c.name}}
                 </li>
               </ul>
@@ -86,7 +91,10 @@ export default {
   data () {
     return {
       cities   :[],
-      hotCities:[]
+      hotCities:[],
+      cityDialog: {
+        show:false
+      }
     }
   },
   methods: {
@@ -95,6 +103,7 @@ export default {
     },
     selectCity (name) {
       // city.name||city.cityName; city.id||city.cityId;
+      this.cityDialog.show = false;
       console.log(name)
     },
     scrollToAnchor (name) {
