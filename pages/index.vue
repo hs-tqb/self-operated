@@ -1,20 +1,23 @@
 <style lang="less">
   @import url(~assets/css/variable.less);
   .dialog-container { 
-    position:fixed; top:0; left:0; width:100vw; height:100vh; 
+    position:fixed; top:0; left:0; z-index:100; width:100vw; height:100vh; 
     background-color: rgba(0,0,0,.3);
   }
   #dialog-cities {
     @gap-s:5px;
     @gap-n:15px;
     @gap-outer:20px;
-    .inner-wrapper {
+    .outer-wrapper {
       position:relative;
       margin:20px;
       height:calc(~"100vh - 20px * 2");
-      background-color:#fff;
       border-radius:5px;
       .scroll;
+    }
+    .inner-wrapper {
+      position:relative;
+      background-color:#fff;
     }
     h3 { padding:@gap-s @gap-n; background-color:@color-border-lighter; }
     #hot-cities {
@@ -43,32 +46,34 @@
 <template>
   <div id="page-home">
     <div id="dialog-cities" class="dialog-container">
-      <div class="inner-wrapper">
-        <div id="hot-cities">
-          <h3>热门城市</h3>
-          <ul class="list">
-            <li v-for="(c,i) in hotCities" :key="`hc${i}`" @click="selectCity(c.cityId)">
-              {{c.cityName}}
-            </li>
-          </ul>
-        </div>
-        <div id="all-cities">
-          <template v-for="(s,i) in cities">
-            <h3 :ref="`letter-${s.letter}`" :key="`act${i}`">{{s.letter}}</h3>
-            <ul class="list" :key="`acl${i}`">
-              <li v-for="(c,j) in s.data" :key="`acc${j}`" @click="selectCity(c.id)">
-                {{c.name}}
+      <div class="outer-wrapper">
+        <div class="inner-wrapper">
+          <div id="hot-cities">
+            <h3>热门城市</h3>
+            <ul class="list">
+              <li v-for="(c,i) in hotCities" :key="`hc${i}`" @click="selectCity(c.cityId)">
+                {{c.cityName}}
               </li>
             </ul>
-          </template>
+          </div>
+          <div id="all-cities">
+            <template v-for="(s,i) in cities">
+              <h3 :ref="`letter-${s.letter}`" :key="`act${i}`">{{s.letter}}</h3>
+              <ul class="list" :key="`acl${i}`">
+                <li v-for="(c,j) in s.data" :key="`acc${j}`" @click="selectCity(c.id)">
+                  {{c.name}}
+                </li>
+              </ul>
+            </template>
+          </div>
         </div>
+        <ul id="anchors">
+          <li v-for="(s,i) in cities" 
+            @click="scrollToAnchor(s.letter)"
+            :key="`aca${i}`"
+          >{{s.letter}}</li>
+        </ul>
       </div>
-      <ul id="anchors">
-        <li v-for="(s,i) in cities" 
-          @click="scrollToAnchor(s.letter)"
-          :key="`aca${i}`"
-        >{{s.letter}}</li>
-      </ul>
     </div>
   </div>
 </template>
