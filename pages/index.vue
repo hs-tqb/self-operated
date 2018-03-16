@@ -45,6 +45,14 @@
   }
   #page-home {
     .panel { margin:15px 20px; }
+    h5 { font-size:12px; }
+    .large { font-size:26px; }
+    .huge  { font-size:48px; color:@color-text-primary }
+    .text-center { text-align:center; }
+    #options {
+      a, div { display:inline-block; .border(bottom); white-space:nowrap; }
+      input { -webkit-appearance:none; border:0 none; outline:0 none; }
+    }
     #condition { 
       .flow; 
       li { .flex(1); }
@@ -54,7 +62,7 @@
       li { .flex(1); }
       .input {
         .flow(column);
-        input { width:100%; border-bottom:1px solid @color-border-base; }
+        input { width:100%; .border(bottom); border-radius:0; }
       }
     }
   }
@@ -62,23 +70,23 @@
 <template>
   <div id="page-home" @click="eventTest" v-if="ready">
     <div id="options" class="panel">
-      <a href="javascript:void(0)">{{safeguard.city.name}}</a>
+      <a href="javascript:void(0)" class="large">{{safeguard.city.name}}</a>
       <h5>保障时间</h5>
       <!-- <a href="javascript:void(0)">{{safeguard.date.from}} > {{safeguard.date.to}}</a> -->
-      <div>
+      <div class="large">
         <input type="date" v-model="safeguard.date.from" @change="eventTest"> >
         <input type="date" v-model="safeguard.date.to">
       </div>
     </div>
     <div id="payout" class="panel">
       <ul id="condition">
-        <li>
+        <li class="text-center">
           <h5>保障金（元）</h5>
-          <p> <span>{{safeguard.price*safeguard.quantity}}</span> 元</p>
+          <p><span class="large">{{safeguard.price*safeguard.quantity}}</span> 元</p>
         </li>
-        <li>
+        <li class="text-center">
           <h5>降水量触发条件</h5>
-          <p> <span>{{totalAmount}}</span> mm</p>
+          <p> <span class="large">{{totalAmount}}</span> mm</p>
         </li>
       </ul>
       <p>如果北京保障日期内，任意当日累计降水量大于15 mm，则赔付现金红包{{safeguard.price*safeguard.quantity}}元</p>
@@ -140,6 +148,7 @@ import pinyinUtil from '../static/js/pinyinUtil.js'
 export default {
   // head: {
   //   script: [{ src:'http://int.dpool.sina.com.cn/iplookup/iplookup.php?format=js' }]
+  //   remote_ip_info
   // },
   data () {
     // console.log( remote_ip_info )

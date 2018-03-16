@@ -24,7 +24,7 @@
 // 布局
 // .flex()         { display:flex; flex-direction:column; }
 .flex(@n)       { flex:@n; }
-.flow(@d:row,@w:nowrap,@j:flex-start,@a:flex-start) { 
+.flow(@d:row;@w:nowrap;@j:flex-start;@a:flex-start) { 
   display:flex; flex-flow:@d @w;
   justify-content:@j; align-items:@a;
 }
@@ -44,4 +44,20 @@
 .scroll() {
   overflow:auto;
   -webkit-overflow-scrolling:touch;
+}
+
+.border(around;@w:1px;@s:solid;@c:@color-border-base) {
+  border:@w @s @c;
+}
+.border(top;@w:1px;@s:solid;@c:@color-border-base) {
+  border-top:@w @s @c;
+}
+.border(bottom;@w:1px;@s:solid;@c:@color-border-base) {
+  border-bottom:@w @s @c;
+}
+.border(left;@w:1px;@s:solid;@c:@color-border-base) {
+  border-left:@w @s @c;
+}
+.border(right;@w:1px;@s:solid;@c:@color-border-base) {
+  border-right:@w @s @c;
 }
