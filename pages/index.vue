@@ -45,11 +45,13 @@
   }
   #page-home {
     h5 { margin-bottom:15px; font-size:12px; }
-    .panel { margin:15px 20px; }
+    .panel { margin:15px 20px; padding:10px; }
     .large { font-size:26px; color:@color-text-primary; }
     .huge  { font-size:48px; color:@color-text-primary; }
     .text-center { text-align:center; }
     #options {
+      margin-top:0; 
+      padding:15px 0 0 0;
       a { 
         display:inline-block;
         margin-bottom:15px; 
@@ -70,6 +72,7 @@
         .flow; 
         li { .flex(1); }
       }
+      .explain { margin-top:10px; line-height:1.4; }
     }
     #cart {
       padding:10px; .border(around);
@@ -79,12 +82,15 @@
         p, div { height:40px; line-height:40px; }
         input { 
           height:40px; .text-center;
-          &[type=number] { width:70px; -webkit-appearance:none; outline:0 none; .border(around); }
+          &[type=text] { width:70px; -webkit-appearance:none; outline:0 none; .border(around); }
         }
       }
       .input {
         .flow(column);
         input { width:100%; height:40px; .border(bottom); border-radius:0; }
+      }
+      .number-wrapper {
+        .flow;
       }
     }
     #btn-wrapper {
@@ -113,14 +119,14 @@
       <ul id="condition">
         <li class="text-center">
           <h5>保障金（元）</h5>
-          <p><span class="large">{{safeguard.price*safeguard.quantity}}</span> 元</p>
+          <p><span class="huge">{{safeguard.price*safeguard.quantity}}</span> 元</p>
         </li>
         <li class="text-center">
           <h5>降水量触发条件</h5>
-          <p> <span class="large">{{totalAmount}}</span> mm</p>
+          <p> <span class="huge">{{totalAmount}}</span> mm</p>
         </li>
       </ul>
-      <p>如果北京保障日期内，任意当日累计降水量大于15 mm，则赔付现金红包{{safeguard.price*safeguard.quantity}}元</p>
+      <p class="explain">如果北京保障日期内，任意当日累计降水量大于15 mm，则赔付现金红包{{safeguard.price*safeguard.quantity}}元</p>
     </div>
     <div id="cart" class="panel">
       <ul>
@@ -132,7 +138,7 @@
           <h5>份数</h5>
           <div class="number-wrapper">
             <input type="button" class="button" value="-" />
-            <input type="number" min="1" v-model="safeguard.quantity" />
+            <input type="text" min="1" v-model="safeguard.quantity" />
             <input type="button" class="button" value="+" />
           </div>
         </li>

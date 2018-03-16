@@ -8,6 +8,7 @@
   font:inherit; color:inherit; 
   -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
 }
+html { height:100%; }
 body { font:normal 14px/1 sans-serif; color:@color-text-regular; }
 
 
@@ -30,7 +31,8 @@ input[type=text], input[type=button], input[type=submit], button {
 
 
 // 类
-.button { width:60px; height:30px; text-align:center; }
+.button { width:60px; height:100%; min-height:35px; text-align:center; background-color:@color-border-base; }
+.button.text    { background-color:transparent; } 
 .button.block   { display:block; margin:0 auto; width:100%; }
 .button.primary { color:#fff; background-color:@color-primary; }
 .button.regular { background-color:@color-border-base; }
