@@ -44,26 +44,51 @@
     }
   }
   #page-home {
+    h5 { margin-bottom:15px; font-size:12px; }
     .panel { margin:15px 20px; }
-    h5 { font-size:12px; }
-    .large { font-size:26px; }
-    .huge  { font-size:48px; color:@color-text-primary }
+    .large { font-size:26px; color:@color-text-primary; }
+    .huge  { font-size:48px; color:@color-text-primary; }
     .text-center { text-align:center; }
     #options {
-      a, div { display:inline-block; .border(bottom); white-space:nowrap; }
-      input { -webkit-appearance:none; border:0 none; outline:0 none; }
+      a { 
+        display:inline-block;
+        margin-bottom:15px; 
+        min-height:26px; line-height:26px; 
+        .border(bottom);
+        span {
+          position:relative; .large; 
+          input { 
+            // -webkit-appearance:none; border:0 none; outline:0 none; 
+            position:absolute; top:0; left:0; width:100%; height:100%; opacity:0;
+          }
+        }
+      }
     }
-    #condition { 
-      .flow; 
-      li { .flex(1); }
+    #payout {
+      padding:10px; .border(around);
+      #condition { 
+        .flow; 
+        li { .flex(1); }
+      }
     }
     #cart {
+      padding:10px; .border(around);
       ul { .flow; }
-      li { .flex(1); }
+      li { 
+        .flex(1);
+        p, div { height:40px; line-height:40px; }
+        input { 
+          height:40px; .text-center;
+          &[type=number] { width:70px; -webkit-appearance:none; outline:0 none; .border(around); }
+        }
+      }
       .input {
         .flow(column);
-        input { width:100%; .border(bottom); border-radius:0; }
+        input { width:100%; height:40px; .border(bottom); border-radius:0; }
       }
+    }
+    #btn-wrapper {
+      .button {  }
     }
   }
 </style>
@@ -73,10 +98,16 @@
       <a href="javascript:void(0)" class="large">{{safeguard.city.name}}</a>
       <h5>保障时间</h5>
       <!-- <a href="javascript:void(0)">{{safeguard.date.from}} > {{safeguard.date.to}}</a> -->
-      <div class="large">
-        <input type="date" v-model="safeguard.date.from" @change="eventTest"> >
-        <input type="date" v-model="safeguard.date.to">
-      </div>
+      <a href="javascritp:void(0)">
+        <span class="large">
+          {{computedDateFrom}}
+          <input type="date" v-model="safeguard.date.from" @change="eventTest">
+        </span> > 
+        <span class="large">
+          {{computedDateTo}}
+          <input type="date" v-model="safeguard.date.to">
+        </span>
+      </a>
     </div>
     <div id="payout" class="panel">
       <ul id="condition">
@@ -93,13 +124,17 @@
     </div>
     <div id="cart" class="panel">
       <ul>
-        <li>
+        <li class="text-center">
           <h5>单价</h5>
           <p> <span class="large">{{safeguard.price}}</span>元 </p>
         </li>
-        <li>
+        <li class="text-center">
           <h5>份数</h5>
-          <input type="number" min="1" v-model="safeguard.quantity" />
+          <div class="number-wrapper">
+            <input type="button" class="button" value="-" />
+            <input type="number" min="1" v-model="safeguard.quantity" />
+            <input type="button" class="button" value="+" />
+          </div>
         </li>
       </ul>
       <div class="input">
@@ -180,9 +215,16 @@ export default {
     }
   },
   computed: {
+    computedDateFrom() {
+      // console.log( new Date(this.safeguard.date.from) );
+      return this.parseDateToString(new Date(this.safeguard.date.from));
+    },
+    computedDateTo() {
+      return this.parseDateToString(new Date(this.safeguard.date.to));
+    },
     totalAmount() {
       return this.safeguard.price * this.safeguard.quantity;
-    }
+    },
   },
   methods: {
     getFirstLetter (word) {
@@ -192,6 +234,10 @@ export default {
       // this.$store.commit('showMessageDialog', {text:'sdf'})
       // this.citySelectorDialog.show = true;
       console.log(e.target.value)
+    },
+    parseDateToString(date) {
+      let year=date.getFullYear(), month=date.getMonth()+1, day=date.getDate();
+      return `${year}-${month>9?month:'0'+month}-${day>9?day:'0'+day}`
     },
     selectCity (name) {
       // city.name||city.cityName; city.id||city.cityId;
@@ -251,7 +297,6 @@ export default {
       // this.ready = true;
       // this.safeguard.city.name = '深圳';
     }
-
     this.loadCityData();
   }
 }
