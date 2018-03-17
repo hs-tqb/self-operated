@@ -45,7 +45,7 @@
   }
   #page-home {
     h5 { margin-bottom:15px; font-size:12px; }
-    .panel { margin:15px 20px; padding:10px; }
+    .panel { margin:15px 20px 0 20px; padding:10px; }
     .large { font-size:26px; color:@color-text-primary; }
     .huge  { font-size:48px; color:@color-text-primary; }
     .text-center { text-align:center; }
@@ -86,15 +86,31 @@
         }
       }
       .input {
-        .flow(column);
-        input { width:100%; height:40px; .border(bottom); border-radius:0; }
+        .relative; .flow(column); margin-top:20px;
+        input[type=text] { width:100%; height:40px; .border(bottom); border-radius:0; }
+        .coupon { 
+          .relative; .bgc(red);
+          &::after { position:absolute; right:0; top:0; content:'输入验证码' }
+        }
+        .button { position:absolute; right:0; top:0; height:40px; }
       }
       .number-wrapper {
-        .flow;
+        // .flow;
+        .button { min-width:auto; width:40px; }
+      }
+    }
+    #coupon { 
+      // margin-top:0; padding-top:0; 
+      margin:0; padding:0;
+      p { text-align:right; }
+      a { display:inline-block; padding:15px 20px; }
+      .input-wrapper { 
+        margin:0 20px 20px; 
+        input { width:100%; height:30px; .border(bottom); }
       }
     }
     #btn-wrapper {
-      .button {  }
+      margin-top:0; padding:0;
     }
   }
 </style>
@@ -137,15 +153,35 @@
         <li class="text-center">
           <h5>份数</h5>
           <div class="number-wrapper">
-            <input type="button" class="button" value="-" />
-            <input type="text" min="1" v-model="safeguard.quantity" />
-            <input type="button" class="button" value="+" />
+            <input type="button" class="button" value="-" @click="safeguard.quantity>1&&(safeguard.quantity-=1)"/>
+            <input type="text" min="1" :value="safeguard.quantity" @change="quantityChange"/>
+            <input type="button" class="button" value="+" @click="safeguard.quantity+=1"/>
           </div>
         </li>
       </ul>
       <div class="input">
-        <input type="text" placeholder="您的手机号" v-model="safeguard.mobile" />
-        <input type="text" placeholder="验证码" v-model="safeguard.vfCode" />
+        <input type="text" placeholder="您的手机号" v-model.trim="safeguard.mobile" />
+        <input type="text" placeholder="验证码" v-model.trim="safeguard.vfCode" />
+        <input type="text" class="coupon" placeholder="优惠码" v-model.trim="coupon.code" />
+        <input type="button" 
+          class="button text primary" 
+          :disabled="vfCode.disabled" 
+          :value="vfCode.text"
+          @click="sendSMSVFCode"
+        >
+      </div>
+    </div>
+    <div id="coupon" class="panel">
+        {{coupon.state}}, {{coupon.text[coupon.state]}}
+      <p>
+        <a 
+          href="javascript:void(0)" :class="`text-${coupon.state}`" 
+          @click.stop="coupon.collapsed=!coupon.collapsed">
+          {{ coupon.collapsed? coupon.text.init: coupon.code+coupon.text[coupon.state]+(coupon.value||'') }}
+        </a>
+      </p>
+      <div class="input-wrapper" v-if="!coupon.collapsed">
+        <input type="text" @input="couponInput">
       </div>
     </div>
     <div id="btn-wrapper" class="panel">
@@ -187,12 +223,7 @@
 <script>
 import pinyinUtil from '../static/js/pinyinUtil.js'
 export default {
-  // head: {
-  //   script: [{ src:'http://int.dpool.sina.com.cn/iplookup/iplookup.php?format=js' }]
-  //   remote_ip_info
-  // },
   data () {
-    // console.log( remote_ip_info )
     return {
       ready    :true,
       cities   :[],
@@ -213,6 +244,25 @@ export default {
       },
       orderInfo: {
       },
+      vfCode: {
+        disabled:false,
+        text :'发送验证码',
+        time :60,
+        timer:-1,
+      },
+      coupon: {
+        value:0,
+        code:'',
+        state:'empty',
+        collapsed:true,
+        delay:500,
+        text: {
+          'init' :'我有优惠码',
+          'empty':'优惠金额将在支付时直接抵扣',
+          'success':'，优惠码金额 ￥',
+          'failure':'，优惠码无效'
+        }
+      },
       // 选择器
       citySelectorDialog: {
         show:false,
@@ -228,6 +278,13 @@ export default {
     computedDateTo() {
       return this.parseDateToString(new Date(this.safeguard.date.to));
     },
+    computedQuantity() {
+
+    },
+    computedPrice() {
+
+    },
+    // 
     totalAmount() {
       return this.safeguard.price * this.safeguard.quantity;
     },
@@ -238,13 +295,92 @@ export default {
     },
     eventTest(e) {
       // this.$store.commit('showMessageDialog', {text:'sdf'})
-      // this.citySelectorDialog.show = true;
-      console.log(e.target.value)
+      this.citySelectorDialog.show = true;
+      // console.log(e.target.value)
     },
     parseDateToString(date) {
       let year=date.getFullYear(), month=date.getMonth()+1, day=date.getDate();
       return `${year}-${month>9?month:'0'+month}-${day>9?day:'0'+day}`
     },
+    quantityChange(e) {
+      let value = +e.target.value.trim();
+      if ( isNaN(value) || value<1 ) {
+        e.target.value = this.safeguard.quantity;
+        if ( value<1 ) {
+          this.$store.commit('showMessageDialog', {text:'份数最小为：1'})
+        }
+        return;
+      }
+      e.target.value = value;
+      this.safeguard.quantity = value
+    },
+    sendSMSVFCode() {
+      let mobile = this.safeguard.mobile
+      // 验证手机号
+      if ( !/^1\d{10}$/.test(mobile) ) {
+        return this.$store.commit('showMessageDialog', {text:'手机号无效'});
+      }
+      // 重新发送倒计时
+      this.vfCode.disabled = true;
+      this.vfCode.text = (this.vfCode.time--)+'s后重新发送';
+      this.vfCode.timer = setInterval(()=>{
+        this.vfCode.text = (this.vfCode.time--)+'s后重新发送';
+        if ( this.vfCode.time === 0 ) {
+          this.resetVfCodeSetting();
+          clearInterval( this.vfCode.timer );
+        }
+      }, 1000);
+
+      // 发送验证码
+      this.$http.post('getSMSVFCode', {mobile})
+      .then(resp=>{
+        if ( resp.state!==1 ) throw resp.message;
+      })
+      .catch(err=>{
+        this.$store.commit('showMessageDialog', {text:err})
+        this.resetVfCodeSetting();
+      })
+    },
+    resetVfCodeSetting() {
+      console.log('zzz');
+      this.vfCode.time = 60;
+      this.vfCode.disabled = false;
+      this.vfCode.text = '发送验证码';
+    },
+    couponInput(e) {
+      // console.log( this.coupon.code )
+      let target = e.target,
+          coupon = this.coupon;
+      if ( !target.value.trim() ) {
+        coupon.code  = '';
+        coupon.state = 'empty';
+        return;
+      }
+      clearTimeout(coupon.timer);
+      coupon.timer = setTimeout(()=>{
+        coupon.code = target.value;
+        this.$http.post('checkCouponCode', { 
+          mobile:this.safeguard.mobile, 
+          coupons:coupon.code, 
+          productId:10012
+        })
+        .then(resp=>{
+          if ( resp.state!==1 ) return this.$store.commit('showMessageDialog', {text:resp.message})
+          coupon.state = resp.data.discountAmount? 'success': 'failure';
+          coupon.value = resp.data.discountAmount? (resp.data.discountAmount/100).toFixed(2): 0;
+        })
+      }, coupon.delay)
+    },
+    // 订单相关
+    getContract() {
+      this.$http.post('getContract', {})
+      .then(resp=>{
+        if ( resp.state !== 1 ) return this.$store.commit('showMessageDialog', {text:resp.message})
+        this.orderInfo = resp.data;
+        console.log( this.orderInfo )
+      })
+    },
+    // 城市相关
     selectCity (name) {
       // city.name||city.cityName; city.id||city.cityId;
       this.citySelectorDialog.show = false;
@@ -304,6 +440,7 @@ export default {
       // this.safeguard.city.name = '深圳';
     }
     this.loadCityData();
+    this.getContract();
   }
 }
 </script>

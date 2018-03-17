@@ -61,3 +61,13 @@
 .border(right;@w:1px;@s:solid;@c:@color-border-base) {
   border-right:@w @s @c;
 }
+
+
+.relative() { position:relative; }
+
+
+.bg(@c:transparent;@i:url();@r:no-repeat;@p:center;@s) { 
+  background:@c @i @r @p/@s;
+ }
+.bgc(@c) { background-color:@c; }
+.transparent() { background-color:transparent; }
