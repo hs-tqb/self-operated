@@ -3,6 +3,6 @@ module.exports = {
   getHotCities: 'sellerCity/getHotCity',
   addOrder: 'sellerCommon/newAddOrder',
   getSMSVFCode: 'sellerCommon/getCode',
-  getContract:'sellerCommon/getContract',
+  getContract:'mobile/contract/search',
   checkCouponCode:'sellerMerchant/findCoupons',
 }

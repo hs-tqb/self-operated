@@ -109,25 +109,28 @@
         input { width:100%; height:30px; .border(bottom); }
       }
     }
+    padding-bottom:60px;
     #btn-wrapper {
-      margin-top:0; padding:0;
+      position:fixed; bottom:10px; left:0; 
+      padding:0 20px;
+      width:100%;
     }
   }
 </style>
 <template>
-  <div id="page-home" @click="eventTest" v-if="ready">
+  <div id="page-home" @click="" v-if="ready">
     <div id="options" class="panel">
-      <a href="javascript:void(0)" class="large">{{safeguard.city.name}}</a>
+      <a href="javascript:void(0)" class="large" @click="showCityList">{{orderInfo.city.name}}</a>
       <h5>保障时间</h5>
-      <!-- <a href="javascript:void(0)">{{safeguard.date.from}} > {{safeguard.date.to}}</a> -->
-      <a href="javascritp:void(0)">
+      <!-- <a href="javascript:void(0)">{{orderInfo.date.from}} > {{orderInfo.date.to}}</a> -->
+      <a href="javascritp:void(0)" @click="calendarDialog.show=true">
         <span class="large">
           {{computedDateFrom}}
-          <input type="date" v-model="safeguard.date.from" @change="eventTest">
+          <input type="date" v-model="orderInfo.date.from" @change="eventTest">
         </span> > 
         <span class="large">
           {{computedDateTo}}
-          <input type="date" v-model="safeguard.date.to">
+          <input type="date" v-model="orderInfo.date.to">
         </span>
       </a>
     </div>
@@ -135,34 +138,33 @@
       <ul id="condition">
         <li class="text-center">
           <h5>保障金（元）</h5>
-          <p><span class="huge">{{safeguard.price*safeguard.quantity}}</span> 元</p>
+          <p><span class="huge">{{computedPayout}}</span> 元</p>
         </li>
         <li class="text-center">
           <h5>降水量触发条件</h5>
-          <p> <span class="huge">{{totalAmount}}</span> mm</p>
+          <p> <span class="huge">{{contractInfo.threshold}}</span> mm</p>
         </li>
       </ul>
-      <p class="explain">如果北京保障日期内，任意当日累计降水量大于15 mm，则赔付现金红包{{safeguard.price*safeguard.quantity}}元</p>
+      <p class="explain">如果北京保障日期内，任意当日累计降水量大于 {{contractInfo.threshold}} mm，则赔付现金红包{{orderInfo.price*orderInfo.quantity}}元</p>
     </div>
     <div id="cart" class="panel">
       <ul>
         <li class="text-center">
           <h5>单价</h5>
-          <p> <span class="large">{{safeguard.price}}</span>元 </p>
+          <p> <span class="large">{{contractInfo.price}}</span>元 </p>
         </li>
         <li class="text-center">
           <h5>份数</h5>
           <div class="number-wrapper">
-            <input type="button" class="button" value="-" @click="safeguard.quantity>1&&(safeguard.quantity-=1)"/>
-            <input type="text" min="1" :value="safeguard.quantity" @change="quantityChange"/>
-            <input type="button" class="button" value="+" @click="safeguard.quantity+=1"/>
+            <input type="button" class="button" value="-" @click="orderInfo.quantity>1&&(orderInfo.quantity-=1)"/>
+            <input type="text" min="1" :value="orderInfo.quantity" @change="quantityChange"/>
+            <input type="button" class="button" value="+" @click="orderInfo.quantity+=1"/>
           </div>
         </li>
       </ul>
       <div class="input">
-        <input type="text" placeholder="您的手机号" v-model.trim="safeguard.mobile" />
-        <input type="text" placeholder="验证码" v-model.trim="safeguard.vfCode" />
-        <input type="text" class="coupon" placeholder="优惠码" v-model.trim="coupon.code" />
+        <input type="text" placeholder="您的手机号" v-model.trim="orderInfo.mobile" />
+        <input type="text" placeholder="验证码" v-model.trim="orderInfo.vfCode" />
         <input type="button" 
           class="button text primary" 
           :disabled="vfCode.disabled" 
@@ -172,29 +174,28 @@
       </div>
     </div>
     <div id="coupon" class="panel">
-        {{coupon.state}}, {{coupon.text[coupon.state]}}
       <p>
         <a 
-          href="javascript:void(0)" :class="`text-${coupon.state}`" 
-          @click.stop="coupon.collapsed=!coupon.collapsed">
+          href="javascript:void(0)" :class="`text-${coupon.collapsed?'init':coupon.state}`" 
+          @click.stop="toggleCouponCodeInput">
           {{ coupon.collapsed? coupon.text.init: coupon.code+coupon.text[coupon.state]+(coupon.value||'') }}
         </a>
       </p>
       <div class="input-wrapper" v-if="!coupon.collapsed">
-        <input type="text" @input="couponInput">
+        <input type="text" ref="couponCode" @input="couponCodeInput" :value="coupon.code" spellcheck="false">
       </div>
     </div>
-    <div id="btn-wrapper" class="panel">
-      <input type="button" class="button block" :value="`支付${totalAmount}`">
+    <div id="btn-wrapper">
+      <input type="button" class="button block" :value="`支付${computedPayFee}`">
     </div>
-
+    <!-- 弹窗 -->
     <div id="dialog-cities" class="dialog-container" :class="citySelectorDialog.show?'show':''">
       <div class="outer-wrapper">
         <div class="inner-wrapper">
           <div id="hot-cities">
             <h3>热门城市</h3>
             <ul class="list">
-              <li v-for="(c,i) in hotCities" :key="`hc${i}`" @click.stop="selectCity(c.cityId)">
+              <li v-for="(c,i) in hotCities" :key="`hc${i}`" @click.stop="selectCity(c)">
                 {{c.cityName}}
               </li>
             </ul>
@@ -203,7 +204,7 @@
             <template v-for="(s,i) in cities">
               <h3 :ref="`letter-${s.letter}`" :key="`act${i}`">{{s.letter}}</h3>
               <ul class="list" :key="`acl${i}`">
-                <li v-for="(c,j) in s.data" :key="`acc${j}`" @click.stop="selectCity(c.id)">
+                <li v-for="(c,j) in s.data" :key="`acc${j}`" @click.stop="selectCity(c)">
                   {{c.name}}
                 </li>
               </ul>
@@ -218,17 +219,27 @@
         </ul>
       </div>
     </div>
+    <div id="dialog-calendar" class="dialog-container" :class="'show'" v-if="calendarDialog.show">
+      <div class="outer-wrapper">
+        <calendar-viewer :app="{orderTimeLimitMin:5, orderTimeLimitMax:60, orderDaysLimitMin:3}"/>
+      </div>
+    </div>
   </div>
 </template>
 <script>
 import pinyinUtil from '../static/js/pinyinUtil.js'
+import calendarViewer from '~/components/calendar.vue'
+
 export default {
+  async asyncData(ctx) {
+
+  },
   data () {
     return {
       ready    :true,
       cities   :[],
       hotCities:[],
-      safeguard: {
+      orderInfo: {
         city: {
           name:'北京',
           id:''
@@ -237,12 +248,13 @@ export default {
           from:'2017-08-03',
           to:'2017-08-29',
         },
-        price:20,
         quantity:1,
         mobile:'',
-        vfCode:'',
       },
-      orderInfo: {
+      contractInfo: {
+        payout:0,
+        price:0,
+        threshold:0
       },
       vfCode: {
         disabled:false,
@@ -267,27 +279,36 @@ export default {
       citySelectorDialog: {
         show:false,
         city:{}
+      },
+      calendarDialog: {
+        show:false
       }
     }
   },
   computed: {
+    // 订单
     computedDateFrom() {
-      // console.log( new Date(this.safeguard.date.from) );
-      return this.parseDateToString(new Date(this.safeguard.date.from));
+      return this.parseDateToString(new Date(this.orderInfo.date.from));
     },
     computedDateTo() {
-      return this.parseDateToString(new Date(this.safeguard.date.to));
+      return this.parseDateToString(new Date(this.orderInfo.date.to));
     },
-    computedQuantity() {
-
+    // 合约
+    computedPayout() {
+      return this.contractInfo.payout * this.orderInfo.quantity;
     },
-    computedPrice() {
-
+    // 支付
+    computedAmount() {
+      return this.contractInfo.price * this.orderInfo.quantity
     },
-    // 
-    totalAmount() {
-      return this.safeguard.price * this.safeguard.quantity;
-    },
+    computedPayFee() {
+      // 跟是否使用优惠码,和优惠码的额度有关
+      return this.coupon.collapsed? 
+        this.computedAmount: 
+        ((fee)=>{
+          return fee>0? fee:0;
+        })( (this.computedAmount * 100 - this.coupon.value * 100)/100 )
+    }
   },
   methods: {
     getFirstLetter (word) {
@@ -305,17 +326,17 @@ export default {
     quantityChange(e) {
       let value = +e.target.value.trim();
       if ( isNaN(value) || value<1 ) {
-        e.target.value = this.safeguard.quantity;
+        e.target.value = this.orderInfo.quantity;
         if ( value<1 ) {
           this.$store.commit('showMessageDialog', {text:'份数最小为：1'})
         }
         return;
       }
       e.target.value = value;
-      this.safeguard.quantity = value
+      this.orderInfo.quantity = value
     },
     sendSMSVFCode() {
-      let mobile = this.safeguard.mobile
+      let mobile = this.orderInfo.mobile
       // 验证手机号
       if ( !/^1\d{10}$/.test(mobile) ) {
         return this.$store.commit('showMessageDialog', {text:'手机号无效'});
@@ -342,12 +363,21 @@ export default {
       })
     },
     resetVfCodeSetting() {
-      console.log('zzz');
       this.vfCode.time = 60;
       this.vfCode.disabled = false;
       this.vfCode.text = '发送验证码';
     },
-    couponInput(e) {
+    toggleCouponCodeInput() {
+      // 除了作展开动作, 还作聚/失焦
+      if ( !(this.coupon.collapsed=!this.coupon.collapsed) ) {
+        this.$nextTick(()=>{
+          this.$refs.couponCode.focus()
+        })
+      } else {
+        this.$refs.couponCode.blur()
+      }
+    },
+    couponCodeInput(e) {
       // console.log( this.coupon.code )
       let target = e.target,
           coupon = this.coupon;
@@ -360,7 +390,7 @@ export default {
       coupon.timer = setTimeout(()=>{
         coupon.code = target.value;
         this.$http.post('checkCouponCode', { 
-          mobile:this.safeguard.mobile, 
+          mobile:this.orderInfo.mobile, 
           coupons:coupon.code, 
           productId:10012
         })
@@ -373,18 +403,31 @@ export default {
     },
     // 订单相关
     getContract() {
-      this.$http.post('getContract', {})
+      this.$http.post('getContract', {
+        merchantId:'10012',
+        cityId:this.orderInfo.city.id,
+        stime:'20180320',
+        etime:'20180418',
+        openid:''
+      })
       .then(resp=>{
         if ( resp.state !== 1 ) return this.$store.commit('showMessageDialog', {text:resp.message})
-        this.orderInfo = resp.data;
-        console.log( this.orderInfo )
+        this.contractInfo = resp.data;
+        console.log('contractInfo_____________');
+        console.log( this.contractInfo )
+        console.log('contractInfo_____________');
       })
     },
     // 城市相关
-    selectCity (name) {
-      // city.name||city.cityName; city.id||city.cityId;
+    showCityList() {
+      this.citySelectorDialog.show = true;
+    },
+    selectCity (c) {
+      if ( this.orderInfo.city.id !== (c.id||c.cityId) ) {
+        this.orderInfo.city = {id:c.id||c.cityId, name:c.name||c.cityName};
+        this.getContract();
+      }
       this.citySelectorDialog.show = false;
-      console.log(name)
     },
     scrollToAnchor (name) {
       this.$refs['letter-'+name][0].scrollIntoView()
@@ -437,10 +480,16 @@ export default {
   created () {
     if ( typeof window === 'object' && typeof window.document === 'object' ) {
       // this.ready = true;
-      // this.safeguard.city.name = '深圳';
+      // this.orderInfo.city.name = '深圳';
     }
     this.loadCityData();
     this.getContract();
+  },
+  mounted() {
+    this.calendarDialog.show = true;
+  },
+  components: {
+    calendarViewer
   }
 }
 </script>

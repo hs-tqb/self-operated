@@ -23,6 +23,9 @@ module.exports = {
   /*
   ** Add axios globally
   */
+  env: {
+    RUN_ENV:process.env.RUN_ENV
+  },
   build: {
     vendor: ['axios'],
     /*
