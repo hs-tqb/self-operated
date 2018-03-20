@@ -514,8 +514,8 @@ export default {
       let url = process.env.RUN_ENV === 'development'? 'pay_wechat_test': 'pay_wechat';
       this.$http.post(url, {
           outTradeNo: this.contractInfo.contractId,
-          totalFee  : this.computedPayFee,
-          body      : '晴空万里宝'
+          totalFee  : this.computedPayFee * 100,
+          body      : '自营降雨'
         })
         .then(resp=>{
           console.log( resp )
