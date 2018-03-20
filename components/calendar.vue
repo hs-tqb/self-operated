@@ -469,9 +469,28 @@ export default {
 
     let monthList = this.getMonthList(date, this.config.monthOnShow);
     // 当月只剩最后一周的时候, 下月的前补足会把今日日期也给补上
-    monthList = this.clearRepeatDays(monthList);
+    // monthList = this.clearRepeatDays(monthList);
     // 恢复已选城市
-    monthList = this.restoreCitySelection(monthList);
+    // monthList = this.restoreCitySelection(monthList);
+    let {dateFrom, dateTo} = this.config;
+    let d1 = this.initDayObject(dateFrom.getFullYear(), dateFrom.getMonth(), dateFrom.getDate(), 'normal');
+    let d2 = this.initDayObject(dateTo.getFullYear(), dateTo.getMonth(), dateTo.getDate(), 'normal');
+    let selections = [];
+    monthList.forEach(m=>{
+      if ( 
+        (m.date.year!==d1.year||m.date.month!==d1.month) && 
+        (m.date.year!==d2.year||m.date.month!==d2.month)
+      ) return;
+      m.data.forEach(d=>{
+        if ( d.type==='normal' && (d.day===d1.day||d.day===d2.day) ) {
+          d.selected = true;
+          selections.push( d );
+        }
+      })
+    })
+    this.selections = selections;
+
+    
     // 因为用flex布局, 给月份内部再加一个周分组会更好处理
     monthList = this.groupMonthByWeek(monthList);
 

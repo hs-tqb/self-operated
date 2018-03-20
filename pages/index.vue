@@ -184,7 +184,13 @@
       </div>
     </div>
     <div id="btn-wrapper">
-      <input type="button" class="button block" :value="`支付${computedPayFee}`">
+      <input 
+        type="button" class="button block" 
+        :class="orderable?'primary':''"
+        :value="`支付 ￥${computedPayFee}`"
+        :disabled="!orderable"
+        @click="wechatPay"
+      >
     </div>
     <!-- 弹窗 -->
     <div id="dialog-cities" class="dialog-container" :class="citySelectorDialog.show?'show':''">
@@ -230,7 +236,13 @@ import calendarViewer from '~/components/calendar.vue'
 
 export default {
   async asyncData(ctx) {
+    let config = {
+      orderTimeLimitMax:60,
+      orderTimeLimitMin:10,
+      orderDaysLimitMin:3
+    };
 
+    return { config }
   },
   data () {
     return {
@@ -285,8 +297,8 @@ export default {
           orderTimeLimitMax:60, 
           orderDaysLimitMin:3,
           monthOnShow:3,
-          dayFrom:new Date(),
-          dayTo:new Date()
+          dateFrom:new Date(),
+          dateTo:new Date()
         }
       },
       mounted: false
@@ -315,6 +327,9 @@ export default {
         ((fee)=>{
           return fee>0? fee:0;
         })( (this.computedAmount * 100 - this.coupon.value * 100)/100 )
+    },
+    orderable() {
+      return this.orderInfo.mobile
     }
   },
   methods: {
@@ -429,7 +444,7 @@ export default {
         cityId:this.orderInfo.city.id,
         stime:this.parseDateForParam(this.orderInfo.date.from),
         etime:this.parseDateForParam(this.orderInfo.date.to),
-        openid:''
+        openid:this.openId
       })
       .then(resp=>{
         if ( resp.state !== 1 ) return this.$store.commit('showMessageDialog', {text:resp.message})
@@ -494,19 +509,68 @@ export default {
         console.log(err)
       })
     },
+    wechatPay() {
+
+      let url = process.env.RUN_ENV === 'development'? 'pay_wechat_test': 'pay_wechat';
+      this.$http.post(url, {
+          outTradeNo: this.contractInfo.contractId,
+          totalFee  : this.computedPayFee,
+          body      : '晴空万里宝'
+        })
+        .then(resp=>{
+          console.log( resp )
+          // this.payment.wechat.qrcode = resp.data.code_url;
+          // this.$nextTick(()=>{
+          //   CountDown.closeBySign('wxQrcodeLifeCycle');
+          //   CountDown.openTimeCountBySeconds({
+          //       Ele: this.$refs.wxQrcodeLifeCycle,
+          //       CountDownSeconds:30,
+          //       Divider: ':',
+          //       Sign   : 'wxQrcodeLifeCycle',
+          //       EndFunc: function () {
+          //       }
+          //   });
+          // });
+        })
+    }
   },
   created () {
-    if ( typeof window === 'object' && typeof window.document === 'object' ) {
-      // this.ready = true;
-      // this.orderInfo.city.name = '深圳';
-    }
     this.loadCityData();
     this.getContract();
+
+    let config  = this.config;
+    let dateFrom = new Date(),
+        dateTo   = new Date();
+    dateFrom.setDate(dateFrom.getDate() + config.orderTimeLimitMin + 1);
+    dateTo.setDate(dateTo.getDate() + config.orderTimeLimitMin +  config.orderDaysLimitMin);
+
+
+    this.orderInfo.date.from = dateFrom;
+    this.orderInfo.date.to   = dateTo;
+
+    this.calendarDialog.config = {
+      ...this.calendarDialog.config,
+      orderTimeLimitMax:config.orderTimeLimitMax,
+      orderTimeLimitMin:config.orderTimeLimitMin,
+      orderDaysLimitMin:config.orderDaysLimitMin,
+      dateFrom,
+      dateTo
+    };
   },
   mounted() {
     // if ( typeof window==='object' ) {
-      this.mounted = true;
+    this.mounted = true;
     // }
+
+    // this.$http.get('getOpenId')
+    //   .then(resp=>{
+    //     if ( resp.state === 1 ) {
+    //       this.openId = resp.data;
+    //     }
+    //   })
+    //   .catch(err=>{
+    //     console.err(err);
+    //   })
   },
   components: {
     calendarViewer

@@ -6,7 +6,7 @@
   "private": true,
   "scripts": {
     "dev": "cross-env PORT=3010 RUN_ENV=development NAME=development backpack dev",
-    "test": "cross-en PORT=3001 RUN_ENV=test NAME=test backpack dev",
+    "test": "cross-env PORT=3001 RUN_ENV=test NAME=test backpack dev",
     "build": "nuxt build && backpack build",
     "start": "cross-env PORT=3010 RUN_ENV=production NODE_ENV=production NAME=production node build/main.js",
     "precommit": "npm run lint",

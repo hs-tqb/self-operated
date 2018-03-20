@@ -1,3 +1,5 @@
+
+
 module.exports = {
   /*
   ** Headers of the page
@@ -11,7 +13,11 @@ module.exports = {
     ],
     link: [
       { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' }
-    ]
+    ],
+    script: [
+      { src:'http://res.wx.qq.com/open/js/jweixin-1.2.0.js' },
+      { src:'/js/wxconfig.js' }
+    ],
   },
   /*
   ** Global CSS
