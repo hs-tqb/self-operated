@@ -102,11 +102,10 @@
 
 <script>
 export default {
-  props:['app'],
+  props:['config'],
   data() {
     return {
       today      : null,
-      monthOnShow: 3,                       // 显示几个月份
       monthList  : [],
 
       showTips  : 'default',                // 下单操作的小贴士, 值为: default/discontinuity/valid, 对应 默认/选择不连续/有效 状态的不同文案提示
@@ -287,8 +286,8 @@ export default {
         // 对3日内做处理 ( 未来3日内不能选定 )
         let temp = +new Date(year, month, day);
         if ( 
-          temp < (+today) + this.app.orderTimeLimitMin * 86400000   
-          || temp >= (+today) + this.app.orderTimeLimitMax * 86400000
+          temp < (+today) + this.config.orderTimeLimitMin * 86400000   
+          || temp >= (+today) + this.config.orderTimeLimitMax * 86400000
         ) {
           type = "limit";
           selectable = false;
@@ -314,12 +313,6 @@ export default {
           && d1.day === d2.day;
     },
     // 刷新数据
-    refreshData(name) {
-      // let obj = {};
-      // obj[name] = this[name];
-      // this.setData(obj);
-
-    },
     refreshMonthList(idxs,obj) {
       this.monthList[idxs[0]].data[idxs[1]].splice( [idxs[2]],1, obj );
     },
@@ -356,7 +349,10 @@ export default {
         this.selections = [dayObj];
       }
       this.makeContinuity();
-      this.checkOrderable();
+      if ( this.checkOrderable2() ) {
+        // this.config.dialog.show = false;
+        this.$emit('dateChange', this.selections[0], this.selections[this.selections.length-1]);
+      }
     },
     makeContinuity() {
       // console.log( this.selections );
@@ -403,9 +399,10 @@ export default {
       return data;
     },
     checkOrderable2() {
-      let selections = this.selections;
+      let selections = this.selections,
+          result     = false;
       // 如果天数不够
-      if (selections.length < this.app.orderDaysLimitMin ) {
+      if (selections.length < this.config.orderDaysLimitMin ) {
         this.showTips  = 'default';
         this.orderable = false;
       } 
@@ -413,153 +410,24 @@ export default {
       else {
         this.showTips = 'valid';
         this.orderable = true;
-        console.log('zzz');
-        console.log( selections[0], selections[selections.length-1] )
-        console.log('zzz');
-        // this.orderDateStart =result.dates[0];
-        // this.orderDateEnd = result.dates[ result.dates.length-1 ];
-        // this.orderDateCount = result.dates.length;
+        this.selections.sort((c,n)=>(c.year*1000+c.month*100+c.day)-(n.year*1000+n.month*100+n.day));
+        this.orderDateStart = this.getShortDate(this.selections[0]);
+        this.orderDateEnd   = this.getShortDate(this.selections[this.selections.length-1]);
+        this.orderDateCount = this.selections.length;
+        
+        result = true;
       } 
 
-      console.log( this.showTips, this.orderable );
+      return result;
     },
-    // 更新选定城市
-    updateSelect(e) {
-      let dayObj = this.getDayObject( this.selectedDayIdxs );
-      // dayObj.showOperationBar = false;
-      // this.selectCity(this.selectedDay);
-      // this.refreshData('monthList');
-      this.refreshMonthList(this.selectedDayIdxs, dayObj);
-
-
-      // 埋点
-      // this.app.tdsdk.event({
-      //   id: 'ChangePla'
-      // });
+    getShortDate(d) {
+      return (d.month>9?d.month:'0'+d.month) + '-' + 
+        (d.day>9?d.day:'0'+d.day)
     },
     // 检测订单的有效性
-    checkOrderable(fromCache) {
-      let monthList     = this.monthList;
-      let selections    = [];
-      let selectionIdxs = [];
-      if ( fromCache ) {
-        selections = this.getSelectedDaysStorage();
-        selections.forEach(s=>{
-          monthList.forEach((m,mi)=>{
-            if ( m.date.year!==s.year || m.date.month!==s.month ) return;
-            m.data.forEach((w,wi)=>{
-              w.forEach((d,di)=>{
-                if ( d.day === s.day ) {
-                  selectionIdxs.push(`${mi}-${wi}-${di}`);
-                }
-              });
-            })
-          });
-        });
-      } else {
-        monthList.forEach((m,mi)=>{
-          m.data.forEach((w,wi)=>{
-            w.forEach((d,di)=>{
-              d.incontinuous = false;
-              if ( d.selected ) {
-                selections.push( d );
-                selectionIdxs.push(`${mi}-${wi}-${di}`);
-              }
-            });
-          })
-        });
-      }
-
-      // 
-      let data   = {};
-      let result = null; 
-
-      // 如果天数不够
-      if (selections.length < this.app.orderDaysLimitMin ) {
-        this.showTips  = 'default';
-        this.orderable = false;
-        this.monthList = this.markIncontinuousDays(selections);
-      } 
-      // 如果是有效(连续)选择
-      else if ( result=this.checkSelectionContinuity(selections) ) {
-        this.showTips = 'valid';
-        this.orderable = true;
-        this.orderDateStart =result.dates[0];
-        this.orderDateEnd = result.dates[ result.dates.length-1 ];
-        this.orderDateCount = result.dates.length;
-        this.monthList = this.markIncontinuousDays(selections)
-      } 
-      // 如果不是有效(连续)选择, 则做相应提示
-      else {
-        this.showTips  = 'discontinuity';
-        this.orderable = false;
-        this.monthList = this.markIncontinuousDays(selections)
-      }
-
-      console.log('_________________是否可下单_______________')
-      console.log(result);
-      console.log('_________________是否可下单_______________')
-
-      this.selections = selections;
-      this.setSelectedDaysStorage(selections);
-    },
     // 检查选择的连续性
-    checkSelectionContinuity(selections) {
-      let t  = selections[0],
-          d1 = null,
-          d2 = null,
-          r  = {dates:[]},
-          s  = 86400000;    // 一天的时间间隔(ms)
-
-      if ( !selections.length ) return false;
-
-      for (let i=0,len=selections.length-1; i<len; i++) {
-        d1 = selections[i];
-        d2 = selections[i+1];
-        // r.cities.push( d1.city );
-        r.dates.push( this.prefixZero(1+d1.month)+'-'+this.prefixZero(d1.day) );
-
-        if ( new Date(d1.year,d1.month,d1.day).getTime() + s < new Date(d2.year,d2.month,d2.day).getTime() ) {
-          return false;
-        }
-      }
-      // r.cities.push(d2.city);
-      r.dates.push(this.prefixZero(1+d2.month) + '-' + this.prefixZero(d2.day) );
-      // r.cities = this.keepUniItem( r.cities , 'cityId');
-      return r;
-    },
     // 提示非连续性
-    markIncontinuousDays(selections, data) {
-      data = data || this.monthList;
-      if ( !selections.length ) return data;
-      let headMost = selections[0];
-      let backMost = selections[selections.length-1];
-      let headMostTime = + new Date(headMost.year, headMost.month, headMost.day);   // 获取毫秒值, 用于比较
-      let backMostTime = + new Date(backMost.year, backMost.month, backMost.day);
-      let dayTime      = 0;
-
-      data.forEach((m,mi)=>{
-        m.data.forEach((w,wi)=>{
-          w.forEach((d,di)=>{
-            dayTime = new Date(d.year, d.month, d.day).getTime();
-            if ( !d.selectable || d.selected || dayTime<headMostTime || dayTime>backMostTime ) return;
-            d.incontinuous = true;
-          })
-        });
-      });
-
-      return data;
-    },
     // 列表去重
-    keepUniItem(list,name) {
-      let map = {};
-      return true;
-      return list.filter(item=>{
-        if (map['_' + item.cityId] ) return false;
-        map['_' + item.cityId] = true;
-        return true;
-      });
-    },
     getRandomStr(len, str) {
       str = str || '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_-';
       let l = str.length, 
@@ -570,26 +438,6 @@ export default {
       return r.join('');
     },
     // 提交订单
-    submitOrder(e) {
-      // 如果是不可点击状态, 则不作处理
-      // if ( !e.currentTarget.dataset.orderable ) return;
-      if ( e.currentTarget.getAttribute('data-orderable')!=='true' ) return;
-      
-      
-      let selections = this.selections || this.getSelectedDaysStorage();
-      let times = [], cityIds = [];
-      selections.forEach(item=>{
-        times.push(`${item.year}-${this.prefixZero(item.month+1)}-${this.prefixZero(item.day)}`);
-        cityIds.push( item.city.cityId );
-      });
-
-      // return wx.navigateTo({
-      //   url: "../../detail/detail",
-      // });
-
-      // 点击下单则清空已选城市缓存
-      // this.setSelectedDaysStorage(null);
-    },
     // 补足0
     prefixZero(n) {
       return n>9?n:'0'+n;
@@ -602,8 +450,8 @@ export default {
     // 获取已选城市数据
     getSelectedDaysStorage() {
       let todayMs     = +this.today;
-      let intervalMin = this.app.orderTimeLimitMin * 86400000;
-      // let intervalMax = this.app.orderTimeLimitMax;
+      let intervalMin = this.config.orderTimeLimitMin * 86400000;
+      // let intervalMax = this.config.orderTimeLimitMax;
       let temp = null;
       // 过滤掉老的缓存, 老的缓存不涉及未来, 所以不做最大的对比
       return (JSON.parse(localStorage.getItem('_selectedDays')||'[]')).filter(d=>{
@@ -613,13 +461,13 @@ export default {
     },
   },
   created() {
-    // this.app.calendarPage = this;
+    // this.config.calendarPage = this;
     let date  = new Date();
     date.setHours(0); // 置为0点
 
     this.today = new Date(+date); // 重新new一个对象, 确保 data 里的数据保持独立
 
-    let monthList = this.getMonthList(date, this.monthOnShow);
+    let monthList = this.getMonthList(date, this.config.monthOnShow);
     // 当月只剩最后一周的时候, 下月的前补足会把今日日期也给补上
     monthList = this.clearRepeatDays(monthList);
     // 恢复已选城市

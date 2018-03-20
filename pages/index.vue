@@ -122,15 +122,13 @@
     <div id="options" class="panel">
       <a href="javascript:void(0)" class="large" @click="showCityList">{{orderInfo.city.name}}</a>
       <h5>保障时间</h5>
-      <!-- <a href="javascript:void(0)">{{orderInfo.date.from}} > {{orderInfo.date.to}}</a> -->
       <a href="javascritp:void(0)" @click="calendarDialog.show=true">
         <span class="large">
           {{computedDateFrom}}
-          <input type="date" v-model="orderInfo.date.from" @change="eventTest">
         </span> > 
         <span class="large">
           {{computedDateTo}}
-          <input type="date" v-model="orderInfo.date.to">
+          <!-- <input type="date" v-model="orderInfo.date.to"> -->
         </span>
       </a>
     </div>
@@ -157,8 +155,8 @@
           <h5>份数</h5>
           <div class="number-wrapper">
             <input type="button" class="button" value="-" @click="orderInfo.quantity>1&&(orderInfo.quantity-=1)"/>
-            <input type="text" min="1" :value="orderInfo.quantity" @change="quantityChange"/>
-            <input type="button" class="button" value="+" @click="orderInfo.quantity+=1"/>
+            <input type="text" min="1" max="2" disabled :value="orderInfo.quantity" @change="quantityChange"/>
+            <input type="button" class="button" value="+" @click="orderInfo.quantity<2&&(orderInfo.quantity+=1)"/>
           </div>
         </li>
       </ul>
@@ -219,9 +217,9 @@
         </ul>
       </div>
     </div>
-    <div id="dialog-calendar" class="dialog-container" :class="'show'" v-if="calendarDialog.show">
+    <div id="dialog-calendar" class="dialog-container" :class="calendarDialog.show?'show':''" v-if="mounted">
       <div class="outer-wrapper">
-        <calendar-viewer :app="{orderTimeLimitMin:5, orderTimeLimitMax:60, orderDaysLimitMin:3}"/>
+        <calendar-viewer :config="calendarDialog.config" @dateChange="dateChange" />
       </div>
     </div>
   </div>
@@ -242,14 +240,14 @@ export default {
       orderInfo: {
         city: {
           name:'北京',
-          id:''
+          id:'CN101010100'
         },
         date: {
-          from:'2017-08-03',
-          to:'2017-08-29',
+          from:new Date(),
+          to:new Date(),
         },
         quantity:1,
-        mobile:'',
+        mobile:'13131313131',
       },
       contractInfo: {
         payout:0,
@@ -281,8 +279,17 @@ export default {
         city:{}
       },
       calendarDialog: {
-        show:false
-      }
+        show:false,
+        config: {
+          orderTimeLimitMin:10, 
+          orderTimeLimitMax:60, 
+          orderDaysLimitMin:3,
+          monthOnShow:3,
+          dayFrom:new Date(),
+          dayTo:new Date()
+        }
+      },
+      mounted: false
     }
   },
   computed: {
@@ -320,8 +327,8 @@ export default {
       // console.log(e.target.value)
     },
     parseDateToString(date) {
-      let year=date.getFullYear(), month=date.getMonth()+1, day=date.getDate();
-      return `${year}-${month>9?month:'0'+month}-${day>9?day:'0'+day}`
+      let month=date.getMonth()+1, day=date.getDate();
+      return `${month>9?month:'0'+month}-${day>9?day:'0'+day}`
     },
     quantityChange(e) {
       let value = +e.target.value.trim();
@@ -401,21 +408,32 @@ export default {
         })
       }, coupon.delay)
     },
+    dateChange(from, to) {
+      this.orderInfo.date.from = new Date(from.year, from.month, from.day);
+      this.orderInfo.date.to   = new Date(to.year, to.month, to.day);
+      this.calendarDialog.show = false;
+    },
+    getShortDate() {
+
+    },
+    parseDateForParam(d) {
+      return `${d.getFullYear()}${this.prefix0(d.getMonth()+1)}${this.prefix0(d.getDate())}`;
+    },
+    prefix0(n) {
+      return n>9?n:'0'+n;
+    },
     // 订单相关
     getContract() {
       this.$http.post('getContract', {
         merchantId:'10012',
         cityId:this.orderInfo.city.id,
-        stime:'20180320',
-        etime:'20180418',
+        stime:this.parseDateForParam(this.orderInfo.date.from),
+        etime:this.parseDateForParam(this.orderInfo.date.to),
         openid:''
       })
       .then(resp=>{
         if ( resp.state !== 1 ) return this.$store.commit('showMessageDialog', {text:resp.message})
         this.contractInfo = resp.data;
-        console.log('contractInfo_____________');
-        console.log( this.contractInfo )
-        console.log('contractInfo_____________');
       })
     },
     // 城市相关
@@ -433,13 +451,13 @@ export default {
       this.$refs['letter-'+name][0].scrollIntoView()
     },
     loadCityData() {
-      // Promise.all([
-      //   this.$http.post('getHotCities'),
-      //   this.$http.post('getCities')
-      // ])
-      // .then(resps => {
-          let resps = [{"state":1,"message":null,"data":{"list":[{"cityId":"t2101","cityName":"雅虎"},{"cityId":"t2102","cityName":"网景"},{"cityId":"CN54511","cityName":"北京"},{"cityId":"CN54512","cityName":"深圳"},{"cityId":"JA47771","cityName":"冲绳"},{"cityId":"TW59554","cityName":"台北"},{"cityId":"TW58968","cityName":"高雄"},{"cityId":"MY48647","cityName":"吉隆坡"},{"cityId":"JA47671","cityName":"东京"},{"cityId":"HK45007","cityName":"香港"},{"cityId":"JA47412","cityName":"大阪"},{"cityId":"JA47855","cityName":"北海道"},{"cityId":"TW46746","cityName":"基隆"},{"cityId":"TW59358","cityName":"金门"}]},"serverTime":1521099197552},{"state":1,"message":null,"data":{"areaList":[{"id":"1000","name":"新马泰","children":[{"id":"1100","name":"泰国","children":[{"id":"1101","name":"曼谷","children":[]},{"id":"1102","name":"普吉岛","children":[]},{"id":"1103","name":"清迈","children":[]}]},{"id":"1200","name":"马来西亚","children":[{"id":"1201","name":"吉隆坡","children":[]},{"id":"1202","name":"马六甲","children":[]},{"id":"1203","name":"沙巴","children":[]},{"id":"1204","name":"第二行","children":[]},{"id":"1205","name":"好多字好多字好多字","children":[]}]}]},{"id":"t3000","name":"测试3","children":[{"id":"t3100","name":"城市组","children":[{"id":"t3101","name":"有id城市","children":[]},{"id":"","name":"无id城市","children":[]}]}]},{"id":"t1000","name":"测试1-没有数据的试试","children":[]},{"id":"t2000","name":"测试2-公司","children":[{"id":"t2100","name":"互联网那些没落的公司","children":[{"id":"t2101","name":"雅虎","children":[]},{"id":"t2102","name":"网景","children":[]},{"id":"t2103","name":"人人网","children":[]},{"id":"t2104","name":"开心网","children":[]}]},{"id":"t2200","name":"无数据城市组","children":[]},{"id":"t2300","name":"还有一组","children":[{"id":"t2301","name":"小城市一个","children":[]}]}]},{"id":"t4000","name":"测试4-占位","children":[{"id":"t4010","name":"占位组","children":[{"id":"t4011","name":"占位城市","children":[]}]},{"id":"t4020","name":"占位组","children":[{"id":"t4021","name":"占位城市","children":[]}]},{"id":"t4030","name":"占位组","children":[{"id":"t4031","name":"占位城市","children":[]}]},{"id":"t4040","name":"占位组","children":[{"id":"t4041","name":"占位城市","children":[]}]},{"id":"t4050","name":"占位组","children":[{"id":"t4051","name":"占位城市","children":[]}]},{"id":"t4060","name":"占位组","children":[{"id":"t4061","name":"占位城市","children":[]}]},{"id":"t4070","name":"占位组","children":[{"id":"t4071","name":"占位城市","children":[]}]},{"id":"t4080","name":"占位组","children":[{"id":"t4081","name":"占位城市","children":[]}]},{"id":"t4090","name":"占位组","children":[{"id":"t4091","name":"占位城市","children":[]}]},{"id":"t4100","name":"占位组","children":[{"id":"t4101","name":"占位城市","children":[]}]},{"id":"t4110","name":"占位组","children":[{"id":"t4111","name":"占位城市","children":[]}]},{"id":"t4120","name":"占位组","children":[{"id":"t4121","name":"占位城市","children":[]}]},{"id":"t4130","name":"占位组","children":[{"id":"t4131","name":"占位城市","children":[]}]}]}]},"serverTime":1521099197555}]
-        // if ( resps.some(r=>r.state!==1) ) throw 'data error'
+      Promise.all([
+        this.$http.post('getHotCities'),
+        this.$http.post('getCities')
+      ])
+      .then(resps => {
+          // let resps = [{"state":1,"message":null,"data":{"list":[{"cityId":"t2101","cityName":"雅虎"},{"cityId":"t2102","cityName":"网景"},{"cityId":"CN54511","cityName":"北京"},{"cityId":"CN54512","cityName":"深圳"},{"cityId":"JA47771","cityName":"冲绳"},{"cityId":"TW59554","cityName":"台北"},{"cityId":"TW58968","cityName":"高雄"},{"cityId":"MY48647","cityName":"吉隆坡"},{"cityId":"JA47671","cityName":"东京"},{"cityId":"HK45007","cityName":"香港"},{"cityId":"JA47412","cityName":"大阪"},{"cityId":"JA47855","cityName":"北海道"},{"cityId":"TW46746","cityName":"基隆"},{"cityId":"TW59358","cityName":"金门"}]},"serverTime":1521099197552},{"state":1,"message":null,"data":{"areaList":[{"id":"1000","name":"新马泰","children":[{"id":"1100","name":"泰国","children":[{"id":"1101","name":"曼谷","children":[]},{"id":"1102","name":"普吉岛","children":[]},{"id":"1103","name":"清迈","children":[]}]},{"id":"1200","name":"马来西亚","children":[{"id":"1201","name":"吉隆坡","children":[]},{"id":"1202","name":"马六甲","children":[]},{"id":"1203","name":"沙巴","children":[]},{"id":"1204","name":"第二行","children":[]},{"id":"1205","name":"好多字好多字好多字","children":[]}]}]},{"id":"t3000","name":"测试3","children":[{"id":"t3100","name":"城市组","children":[{"id":"t3101","name":"有id城市","children":[]},{"id":"","name":"无id城市","children":[]}]}]},{"id":"t1000","name":"测试1-没有数据的试试","children":[]},{"id":"t2000","name":"测试2-公司","children":[{"id":"t2100","name":"互联网那些没落的公司","children":[{"id":"t2101","name":"雅虎","children":[]},{"id":"t2102","name":"网景","children":[]},{"id":"t2103","name":"人人网","children":[]},{"id":"t2104","name":"开心网","children":[]}]},{"id":"t2200","name":"无数据城市组","children":[]},{"id":"t2300","name":"还有一组","children":[{"id":"t2301","name":"小城市一个","children":[]}]}]},{"id":"t4000","name":"测试4-占位","children":[{"id":"t4010","name":"占位组","children":[{"id":"t4011","name":"占位城市","children":[]}]},{"id":"t4020","name":"占位组","children":[{"id":"t4021","name":"占位城市","children":[]}]},{"id":"t4030","name":"占位组","children":[{"id":"t4031","name":"占位城市","children":[]}]},{"id":"t4040","name":"占位组","children":[{"id":"t4041","name":"占位城市","children":[]}]},{"id":"t4050","name":"占位组","children":[{"id":"t4051","name":"占位城市","children":[]}]},{"id":"t4060","name":"占位组","children":[{"id":"t4061","name":"占位城市","children":[]}]},{"id":"t4070","name":"占位组","children":[{"id":"t4071","name":"占位城市","children":[]}]},{"id":"t4080","name":"占位组","children":[{"id":"t4081","name":"占位城市","children":[]}]},{"id":"t4090","name":"占位组","children":[{"id":"t4091","name":"占位城市","children":[]}]},{"id":"t4100","name":"占位组","children":[{"id":"t4101","name":"占位城市","children":[]}]},{"id":"t4110","name":"占位组","children":[{"id":"t4111","name":"占位城市","children":[]}]},{"id":"t4120","name":"占位组","children":[{"id":"t4121","name":"占位城市","children":[]}]},{"id":"t4130","name":"占位组","children":[{"id":"t4131","name":"占位城市","children":[]}]}]}]},"serverTime":1521099197555}]
+        if ( resps.some(r=>r.state!==1) ) throw 'data error'
         this.hotCities = resps[0].data.list
         let allCities    = []
         let allCitiesMap = {}
@@ -471,10 +489,10 @@ export default {
           })
         })
         this.cities = allCities;
-      // })
-      // .catch(err => {
-        // console.log(err)
-      // })
+      })
+      .catch(err => {
+        console.log(err)
+      })
     },
   },
   created () {
@@ -486,7 +504,9 @@ export default {
     this.getContract();
   },
   mounted() {
-    this.calendarDialog.show = true;
+    // if ( typeof window==='object' ) {
+      this.mounted = true;
+    // }
   },
   components: {
     calendarViewer

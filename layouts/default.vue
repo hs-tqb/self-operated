@@ -10,6 +10,7 @@
   #dialog-message {
     .flow; .align(c); .justify(c);
     background-color:transparent;
+    &.show{ pointer-events:none; }
     p { 
       display:inline-block; 
       padding:7px 16px; 
