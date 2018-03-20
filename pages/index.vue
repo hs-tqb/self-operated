@@ -43,6 +43,16 @@
       }
     }
   }
+  #dialog-payment {
+    .outer-wrapper { position:absolute; left:0; bottom:0; width:100%; .bgc(#fff); transform:translate3d(0,100%,0); transition-duration:300ms; }
+    &.show .outer-wrapper { transform:translate3d(0,0,0); }
+    h3 { line-height:44px; font-size:16px; text-align:center; .border(bottom); }
+    ul { padding:10px; }
+    li { 
+      line-height:1.6;
+      label { display:inline-block; width:100px; }
+    }
+  }
   #page-home {
     h5 { margin-bottom:15px; font-size:12px; }
     .panel { margin:15px 20px 0 20px; padding:10px; }
@@ -189,7 +199,7 @@
         :class="orderable?'primary':''"
         :value="`支付 ￥${computedPayFee}`"
         :disabled="!orderable"
-        @click="wechatPay"
+        @click="paymentDialog.show=true"
       >
     </div>
     <!-- 弹窗 -->
@@ -228,6 +238,23 @@
         <calendar-viewer :config="calendarDialog.config" @dateChange="dateChange" />
       </div>
     </div>
+    <div id="dialog-payment" class="dialog-container" :class="paymentDialog.show?'show':''" @click="paymentDialog.show=false">
+      <div class="outer-wrapper">
+        <h3>订单确认</h3>
+        <ul>
+          <li><label>保障城市</label>{{orderInfo.city.name}}</li>
+          <li><label>保障时间</label>{{formatDateString(orderInfo.date.from)}} 至 {{formatDateString(orderInfo.date.to)}}</li>
+          <li><label>保障条件</label>任意单日降水量 > {{contractInfo.threshold}}mm</li>
+          <li><label>保障金</label>{{computedPayout}}元</li>
+          <li><label>手机号</label>{{mobile}}</li>
+          <li><label>单价</label>{{contractInfo.price}} 元</li>
+          <li><label>分数</label>{{orderInfo.quantity}}</li>
+          <li><label>优惠金额</label>{{coupon.collapsed?0:(coupon.value||0)}} 元</li>
+          <li><label>支付总价</label>{{computedPayFee}} 元</li>
+        </ul>
+        <input type="button" class="button block primary" value="确认支付" @click="wechatPay">
+      </div>
+    </div>
   </div>
 </template>
 <script>
@@ -249,6 +276,9 @@ export default {
       ready    :true,
       cities   :[],
       hotCities:[],
+      userInfo : {
+        mobile :''
+      },
       orderInfo: {
         city: {
           name:'北京',
@@ -301,10 +331,16 @@ export default {
           dateTo:new Date()
         }
       },
+      paymentDialog: {
+        show:false
+      },
       mounted: false
     }
   },
   computed: {
+    mobile() {
+      return this.orderInfo.mobile || this.userInfo.mobile;
+    },
     // 订单
     computedDateFrom() {
       return this.parseDateToString(new Date(this.orderInfo.date.from));
@@ -345,6 +381,9 @@ export default {
       let month=date.getMonth()+1, day=date.getDate();
       return `${month>9?month:'0'+month}-${day>9?day:'0'+day}`
     },
+    formatDateString(d) {
+      return `${d.getFullYear()}-${this.prefix0(d.getMonth()+1)}-${this.prefix0(d.getDate())}`;
+    },
     quantityChange(e) {
       let value = +e.target.value.trim();
       if ( isNaN(value) || value<1 ) {
@@ -361,7 +400,7 @@ export default {
       let mobile = this.orderInfo.mobile
       // 验证手机号
       if ( !/^1\d{10}$/.test(mobile) ) {
-        return this.$store.commit('showMessageDialog', {text:'手机号无效'});
+        return this.$store.commit('showMessageDialog', {type:'failure', text:'手机号无效'});
       }
       // 重新发送倒计时
       this.vfCode.disabled = true;
@@ -380,7 +419,7 @@ export default {
         if ( resp.state!==1 ) throw resp.message;
       })
       .catch(err=>{
-        this.$store.commit('showMessageDialog', {text:err})
+        this.$store.commit('showMessageDialog', {type:'failure', text:err})
         this.resetVfCodeSetting();
       })
     },
@@ -417,7 +456,7 @@ export default {
           productId:10012
         })
         .then(resp=>{
-          if ( resp.state!==1 ) return this.$store.commit('showMessageDialog', {text:resp.message})
+          if ( resp.state!==1 ) return this.$store.commit('showMessageDialog', {type:'failure', text:resp.message})
           coupon.state = resp.data.discountAmount? 'success': 'failure';
           coupon.value = resp.data.discountAmount? (resp.data.discountAmount/100).toFixed(2): 0;
         })
@@ -447,7 +486,7 @@ export default {
         openid:this.openId
       })
       .then(resp=>{
-        if ( resp.state !== 1 ) return this.$store.commit('showMessageDialog', {text:resp.message})
+        if ( resp.state !== 1 ) return this.$store.commit('showMessageDialog', {type:'failure', text:resp.message})
         this.contractInfo = resp.data;
       })
     },
@@ -511,8 +550,7 @@ export default {
     },
     wechatPay() {
 
-      let url = process.env.RUN_ENV === 'development'? 'pay_wechat_test': 'pay_wechat';
-      this.$http.post(url, {
+      this.$http.post('pay_wechat', {
           outTradeNo: this.contractInfo.contractId,
           totalFee  : this.computedPayFee * 100,
           body      : '自营降雨'
@@ -571,6 +609,7 @@ export default {
     //   .catch(err=>{
     //     console.err(err);
     //   })
+
   },
   components: {
     calendarViewer

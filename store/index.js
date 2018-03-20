@@ -13,13 +13,22 @@ const store = ()=>new Vuex.Store({
   },
   mutations: {
     showMessageDialog(state, obj) {
-      if ( !obj.text ) return;
+      if ( !obj.text && !obj.html && !obj.type ) return;
       let dialog = state.messageDialog;
+
+      dialog.show = false;
+      dialog.type = 
+      dialog.text = 
+      dialog.html = '';
+
       clearTimeout(dialog.timer);
       dialog.timer = setTimeout(()=>{
         dialog.show = false;
       }, obj.delay||dialog.delay);
+
       dialog.text = obj.text;
+      dialog.type = obj.type;
+      dialog.html = obj.html;
       dialog.show = true;
     }
   }
