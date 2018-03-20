@@ -12,7 +12,8 @@
     background-color:transparent;
     &.show{ pointer-events:none; }
     .inner-wrapper { 
-      display:inline-block; 
+      display:inline-block;
+      margin-top:-150px;
       padding:14px; 
       max-width:70%;
       line-height:1.4;

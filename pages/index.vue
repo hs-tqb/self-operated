@@ -47,21 +47,82 @@
     .outer-wrapper { position:absolute; left:0; bottom:0; width:100%; .bgc(#fff); transform:translate3d(0,100%,0); transition-duration:300ms; }
     &.show .outer-wrapper { transform:translate3d(0,0,0); }
     h3 { line-height:44px; font-size:16px; text-align:center; .border(bottom); }
-    ul { padding:10px; }
+    ul { padding:10px 20px; padding-bottom:0; }
     li { 
-      line-height:1.6;
+      line-height:26px;
       label { display:inline-block; width:100px; }
     }
+    .btn-wrapper { 
+      margin:15px 20px; 
+      .button { .radius(); }
+    }
   }
+  #dialog-paymentResult {
+    background-color:@color-primary;
+    img.border { display:block; width:100%; }
+    .outer-wrapper { height:100%; padding:30px; }
+    .inner-wrapper { 
+      .panel { margin:0; } .scroll;
+      height:100%; 
+      // max-height:100%;
+      background-color:#fff; .radius(); 
+      h3 { font-size:15px; line-height:1.3; }
+      img + h3 { margin-top:10px; }
+      .tips { margin-top:10px; padding-top:15px; font-size:12px; line-height:1.4; text-align:justify; .border(top); }
+      .info {
+        h3 { 
+          @c:#689eff;
+          .flow; align-items:center;
+          .border { 
+            position:relative; flex:1; height:1px; background-color:@c; 
+            &::after { position:absolute; top:-1px; width:3px; height:3px; .radius(); content:'\200b'; background-color:@c; }
+            &:first-child::after { right:0; }
+            &:last-child::after { left:0; }
+          }
+          .text { margin:0 12px; color:@c; }
+        }
+        ul { margin-top:12px; .border(around); }
+        li { 
+          line-height:30px; font-size:12px;
+          &:not(:last-child) {.border(bottom);} 
+          label { display:inline-block; margin-right:12px; width:100px; text-indent:20px; background-color:#f5f5f5; .border(right); }
+        }
+        .btn-wrapper {
+          margin:15px; margin-bottom:0;
+          .button { .radius(); }
+        }
+      }
+    }
+  }
+  @bgc:#fefefe;
+  .radius() { border-radius:6px; }
+  .inputGap() { padding:0 10px; }
+  .commonInput() { height:40px; .inputGap(); .border(around); .radius(); }
   #page-home {
+    background:@bgc url(~assets/img/banner/bg1.jpg) no-repeat center 0;
+    background-size:100% auto;
     h5 { margin-bottom:15px; font-size:12px; }
-    .panel { margin:15px 20px 0 20px; padding:10px; }
+    h4 { margin-bottom:15px; font-size:14px; }
+    .panel { 
+      margin:15px 20px 0 20px; padding:15px; 
+      &.card { 
+        background-color:@bgc; border-radius:7px; 
+        box-shadow:0 0 25px 1px #ddd;
+      }
+    }
     .large { font-size:26px; color:@color-text-primary; }
     .huge  { font-size:48px; color:@color-text-primary; }
     .text-center { text-align:center; }
+    .text-right  { text-align:right; }
+    .text-left   { text-align:left; }
+    .color-primary { color:@color-primary; }
+    .color-danger { color:@color-danger; }
     #options {
       margin-top:0; 
-      padding:15px 0 0 0;
+      padding:25px 0 0 0;
+      color:#fff;
+      .large { font-size:18px; color:inherit; }
+      h5 { margin-top:5px; margin-bottom:5px; }
       a { 
         display:inline-block;
         margin-bottom:15px; 
@@ -77,32 +138,37 @@
       }
     }
     #payout {
-      padding:10px; .border(around);
+      // padding:10px; 
+      box-shadow:0 80px 25px 1px #e0e0e0;
       #condition { 
         .flow; 
-        li { .flex(1); }
+        li:first-child { .flex(1); }
       }
       .explain { margin-top:10px; line-height:1.4; }
     }
     #cart {
-      padding:10px; .border(around);
+      // padding:10px; 
       ul { .flow; }
       li { 
-        .flex(1);
+        &:first-child { .flex(1); }
         p, div { height:40px; line-height:40px; }
         input { 
           height:40px; .text-center;
-          &[type=text] { width:70px; -webkit-appearance:none; outline:0 none; .border(around); }
+          &[type=text] { width:42px; -webkit-appearance:none; outline:0 none; .border(around); background-color:#fff; }
         }
       }
       .input {
         .relative; .flow(column); margin-top:20px;
-        input[type=text] { width:100%; height:40px; .border(bottom); border-radius:0; }
-        .coupon { 
-          .relative; .bgc(red);
-          &::after { position:absolute; right:0; top:0; content:'输入验证码' }
+        input[type=text] { width:100%; .commonInput(); }
+        // .button { position:absolute; right:0; top:0; height:40px; }
+        .group { 
+          .flow(); margin-top:10px; width:100%;
+          .iw1 { .flex(1); }
+          .iw2 { margin-left:10px; width:120px; }
+          input { width:100%; }
+          // input[type=text] { display:block; .flex(1); }
+          .button { .commonInput(); padding:0; }
         }
-        .button { position:absolute; right:0; top:0; height:40px; }
       }
       .number-wrapper {
         // .flow;
@@ -110,25 +176,40 @@
       }
     }
     #coupon { 
-      // margin-top:0; padding-top:0; 
-      margin:0; padding:0;
-      p { text-align:right; }
-      a { display:inline-block; padding:15px 20px; }
+      position:relative;
+      &:not(.card) { padding:0; }
+      a { position:absolute; top:0; right:0; padding:15px 20px; }
+      .text-init { color:#f78a09; }
       .input-wrapper { 
-        margin:0 20px 20px; 
-        input { width:100%; height:30px; .border(bottom); }
+        margin:0; 
+        input { width:100%;  .commonInput(); }
       }
     }
-    padding-bottom:60px;
+    padding-bottom:75px;
     #btn-wrapper {
-      position:fixed; bottom:10px; left:0; 
+      position:fixed; bottom:15px; left:0; 
       padding:0 20px;
       width:100%;
+      .button {
+        .radius();
+      }
+    }
+  }
+  #gift { 
+    a {
+      position:absolute; right:5px; top:15px; z-index:50;
+      width:50px; height:50px;
+      background:url(~/assets/img/icons/gift.png) no-repeat center;
+      background-size:15px auto;
     }
   }
 </style>
 <template>
   <div id="page-home" @click="" v-if="ready">
+    <div id="gift">
+      <a class="icon" href="javascript:void(0)"></a>
+      <!-- <img src="~/assets/img/icons/gift.png" alt=""> -->
+    </div>
     <div id="options" class="panel">
       <a href="javascript:void(0)" class="large" @click="showCityList">{{orderInfo.city.name}}</a>
       <h5>保障时间</h5>
@@ -142,53 +223,62 @@
         </span>
       </a>
     </div>
-    <div id="payout" class="panel">
+    <div id="payout" class="panel card">
       <ul id="condition">
-        <li class="text-center">
-          <h5>保障金（元）</h5>
-          <p><span class="huge">{{computedPayout}}</span> 元</p>
-        </li>
-        <li class="text-center">
+        <li class="text-left">
           <h5>降水量触发条件</h5>
-          <p> <span class="huge">{{contractInfo.threshold}}</span> mm</p>
+          <p > <span class="large ">{{animation.threshold.value}}</span> mm</p>
+        </li>
+        <li class="text-right">
+          <h5>保障红包</h5>
+          <p class="text-left"><span class="large color-primary">{{animation.payout.value}}</span> 元</p>
         </li>
       </ul>
-      <p class="explain">如果北京保障日期内，任意当日累计降水量大于 {{contractInfo.threshold}} mm，则赔付现金红包{{orderInfo.price*orderInfo.quantity}}元</p>
+      <p class="explain">如果北京保障日期内，任意当日累计降水量大于 {{contractInfo.threshold}} mm，则赔付现金红包 {{computedPayout}} 元</p>
     </div>
-    <div id="cart" class="panel">
+    <div id="cart" class="panel card">
       <ul>
-        <li class="text-center">
-          <h5>单价</h5>
-          <p> <span class="large">{{contractInfo.price}}</span>元 </p>
+        <li class="">
+          <h4>单价</h4>
+          <p> <span class="large color-danger">{{contractInfo.price}}</span> 元</p>
         </li>
-        <li class="text-center">
-          <h5>份数</h5>
+        <li class="">
+          <h4>份数</h4>
           <div class="number-wrapper">
-            <input type="button" class="button" value="-" @click="orderInfo.quantity>1&&(orderInfo.quantity-=1)"/>
+            <input type="button" class="button" value="-" @click="quantityChange('-')"/>
             <input type="text" min="1" max="2" disabled :value="orderInfo.quantity" @change="quantityChange"/>
-            <input type="button" class="button" value="+" @click="orderInfo.quantity<2&&(orderInfo.quantity+=1)"/>
+            <input type="button" class="button" value="+" @click="quantityChange('+')"/>
           </div>
         </li>
       </ul>
       <div class="input">
-        <input type="text" placeholder="您的手机号" v-model.trim="orderInfo.mobile" />
-        <input type="text" placeholder="验证码" v-model.trim="orderInfo.vfCode" />
-        <input type="button" 
-          class="button text primary" 
-          :disabled="vfCode.disabled" 
-          :value="vfCode.text"
-          @click="sendSMSVFCode"
-        >
+        <h4>购买信息</h4>
+        <input type="text" placeholder="您的手机号" :disabled="!!userInfo.mobile" v-model.trim="orderInfo.mobile" />
+        <div class="group" v-if="!userInfo.mobile">
+          <div class="inner-wrapper iw1">
+            <input type="text" placeholder="验证码" v-model.trim="orderInfo.vfCode" />
+          </div>
+          <div class="inner-wrapper iw2">
+            <input type="button" 
+              class="button text primary" 
+              :disabled="vfCode.disabled" 
+              :value="vfCode.text"
+              @click="sendSMSVFCode"
+            >
+          </div>
+        </div>
       </div>
     </div>
-    <div id="coupon" class="panel">
-      <p>
+    <div id="coupon" class="panel" :class="!coupon.collapsed?'card':''">
+      <h4>
+        <span class="text-left" v-if="!coupon.collapsed">优惠码</span>
+        &nbsp;
         <a 
           href="javascript:void(0)" :class="`text-${coupon.collapsed?'init':coupon.state}`" 
           @click.stop="toggleCouponCodeInput">
           {{ coupon.collapsed? coupon.text.init: coupon.code+coupon.text[coupon.state]+(coupon.value||'') }}
         </a>
-      </p>
+      </h4>
       <div class="input-wrapper" v-if="!coupon.collapsed">
         <input type="text" ref="couponCode" @input="couponCodeInput" :value="coupon.code" spellcheck="false">
       </div>
@@ -197,7 +287,7 @@
       <input 
         type="button" class="button block" 
         :class="orderable?'primary':''"
-        :value="`支付 ￥${computedPayFee}`"
+        :value="`支付 ${computedPayFee}元`"
         :disabled="!orderable"
         @click="paymentDialog.show=true"
       >
@@ -245,14 +335,50 @@
           <li><label>保障城市</label>{{orderInfo.city.name}}</li>
           <li><label>保障时间</label>{{formatDateString(orderInfo.date.from)}} 至 {{formatDateString(orderInfo.date.to)}}</li>
           <li><label>保障条件</label>任意单日降水量 > {{contractInfo.threshold}}mm</li>
-          <li><label>保障金</label>{{computedPayout}}元</li>
+          <li><label>保障金额</label>{{computedPayout}}元</li>
           <li><label>手机号</label>{{mobile}}</li>
           <li><label>单价</label>{{contractInfo.price}} 元</li>
-          <li><label>分数</label>{{orderInfo.quantity}}</li>
+          <li><label>份数</label>{{orderInfo.quantity}}</li>
           <li><label>优惠金额</label>{{coupon.collapsed?0:(coupon.value||0)}} 元</li>
           <li><label>支付总价</label>{{computedPayFee}} 元</li>
         </ul>
-        <input type="button" class="button block primary" value="确认支付" @click="wechatPay">
+        <div class="btn-wrapper">
+          <input type="button" class="button block primary" value="确认支付" @click="wechatPay">
+        </div>
+      </div>
+    </div>
+    <div id="dialog-paymentResult" class="dialog-container" :class="paymentResultDialog.show?'show':''">
+      <div class="outer-wrapper">
+        <div class="inner-wrapper">
+          <div class="panel preview text-center">
+            <img src="~/assets/img/icons/success-bg.png" width="50">
+            <h3 class="text-primary">购买成功</h3>
+            <h3 class="text-danger">共支付 {{computedPayFee}}元</h3>
+            <p class="tips">保障期结束后次日，天气宝自动获取来自气象局的天气数据，判定合约是否触发。判定合约触发后，保障红包将在3个工作内转账到您的微信账户中。</p>
+          </div>
+          <img src="~/assets/img/icons/border.jpg" alt="" class="border">
+          <div class="panel info">
+            <h3>
+              <span class="border"></span>
+              <span class="text">保障信息</span>
+              <span class="border"></span>
+            </h3>
+            <ul>
+              <li><label>订单号</label>{{orderInfo.orderId}}</li>
+              <li><label>保障城市</label>{{orderInfo.city.name}}</li>
+              <li><label>保障时间</label>{{formatDateString(orderInfo.date.from)}} 至 {{formatDateString(orderInfo.date.to)}}</li>
+              <li><label>保障条件</label>任意单日降水量 > {{contractInfo.threshold}}mm</li>
+              <li><label>保障金额</label>{{computedPayout}}元</li>
+              <li><label>单价</label>{{contractInfo.price}} 元</li>
+              <li><label>份数</label>{{orderInfo.quantity}}</li>
+              <li><label>优惠金额</label>{{coupon.collapsed?0:(coupon.value||0)}} 元</li>
+              <li><label>支付总价</label>{{computedPayFee}} 元</li>
+            </ul>
+            <div class="btn-wrapper">
+              <input type="button" class="button primary block" value="返回" @click="paymentResultDialog.show=false">
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -277,7 +403,7 @@ export default {
       cities   :[],
       hotCities:[],
       userInfo : {
-        mobile :''
+        mobile :'13'
       },
       orderInfo: {
         city: {
@@ -334,6 +460,16 @@ export default {
       paymentDialog: {
         show:false
       },
+      paymentResultDialog: {
+        show:true
+      },
+
+      animation: {
+        timer  : {},
+        payout : { name:'payout', value:0 },
+        payment: { name:'payment', value:0 },
+        threshold: { name:'thresold', value:0},
+      },
       mounted: false
     }
   },
@@ -365,7 +501,7 @@ export default {
         })( (this.computedAmount * 100 - this.coupon.value * 100)/100 )
     },
     orderable() {
-      return this.orderInfo.mobile
+      return /^1\d{10}$/.test(this.orderInfo.mobile) && (this.userInfo.mobile?true:this.orderInfo.vfCode)
     }
   },
   methods: {
@@ -384,17 +520,26 @@ export default {
     formatDateString(d) {
       return `${d.getFullYear()}-${this.prefix0(d.getMonth()+1)}-${this.prefix0(d.getDate())}`;
     },
-    quantityChange(e) {
-      let value = +e.target.value.trim();
-      if ( isNaN(value) || value<1 ) {
-        e.target.value = this.orderInfo.quantity;
-        if ( value<1 ) {
-          this.$store.commit('showMessageDialog', {text:'份数最小为：1'})
-        }
+    quantityChange(u) {
+      let orderInfo = this.orderInfo;
+      if ( u==='-' && orderInfo.quantity>1 ) {
+        orderInfo.quantity-=1
+      } else if ( u==='+' && orderInfo.quantity<2 ) {
+        orderInfo.quantity+=1
+      } else {
         return;
       }
-      e.target.value = value;
-      this.orderInfo.quantity = value
+      this.animateNumber('payout', this.contractInfo.payout * this.orderInfo.quantity);
+      // let value = +e.target.value.trim();
+      // if ( isNaN(value) || value<1 ) {
+      //   e.target.value = this.orderInfo.quantity;
+      //   if ( value<1 ) {
+      //     this.$store.commit('showMessageDialog', {text:'份数最小为：1'})
+      //   }
+      //   return;
+      // }
+      // e.target.value = value;
+      // this.orderInfo.quantity = value
     },
     sendSMSVFCode() {
       let mobile = this.orderInfo.mobile
@@ -488,6 +633,8 @@ export default {
       .then(resp=>{
         if ( resp.state !== 1 ) return this.$store.commit('showMessageDialog', {type:'failure', text:resp.message})
         this.contractInfo = resp.data;
+        this.animateNumber('payout', resp.data.payout);
+        this.animateNumber('threshold', resp.data.threshold);
       })
     },
     // 城市相关
@@ -549,14 +696,20 @@ export default {
       })
     },
     wechatPay() {
-
-      this.$http.post('pay_wechat', {
+      this.$http.post('pay_wechat_test', {
           outTradeNo: this.contractInfo.contractId,
           totalFee  : this.computedPayFee * 100,
           body      : '自营降雨'
         })
         .then(resp=>{
-          console.log( resp )
+          // console.log( resp )
+          if ( resp.state === 1 ) {
+            this.paymentResultDialog.show = true;
+          } else {
+            return this.$store.commit('showMessageDialog', {type:'failure', text:'支付失败'});
+          }
+
+
           // this.payment.wechat.qrcode = resp.data.code_url;
           // this.$nextTick(()=>{
           //   CountDown.closeBySign('wxQrcodeLifeCycle');
@@ -570,6 +723,20 @@ export default {
           //   });
           // });
         })
+    },
+    animateNumber(name, val) {
+      let a = this.animation,
+          o = a[name];
+      clearInterval( a.timer[o.name] );
+      a.timer[o.name] = setInterval(()=>{
+        if ( o.value === val ) {
+          clearInterval( a.timer[o.name] );
+        } else if ( o.value > val ) {
+          o.value -= 1;
+        } else {
+          o.value += 1;
+        }
+      }, 1000/Math.abs(val-o.value));
     }
   },
   created () {
