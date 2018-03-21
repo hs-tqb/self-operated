@@ -824,7 +824,7 @@ export default {
       this.$http.post('pay_wechat', {
           // outTradeNo: this.contractInfo.contractId,
           // totalFee  : this.computedPayFee * 100,
-          outTradeNo:'1231231241213131',
+          outTradeNo:(Math.random()+'').split('.')[1],
           totalFee  : 10,
           body      : '自营降雨',
           returnUrl : 'w.baotianqi.cn',
