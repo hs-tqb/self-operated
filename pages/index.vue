@@ -20,6 +20,11 @@
       // &.list-wrapper {
       //   padding:25px 0;
       // }
+      .fixedAnchor { 
+        position:fixed; top:50px; left:0; width:100%; opacity:0;
+        &.show { opacity:1; }
+      }
+
     }
     h3 { padding:0 @gap-n; line-height:26px; background-color:@color-border-lighter; }
     #city-search-box {
@@ -325,7 +330,8 @@
           </div>
         </template>
         <template v-else>
-          <div class="inner-wrapper list-wrapper" @scroll="onCityDialogScroll">
+          <div class="inner-wrapper list-wrapper" ref="cityList">
+            <h3 class="fixedAnchor" ref="fixedAnchor"></h3>
             <div id="hot-cities">
               <h3>热门城市</h3>
               <ul class="list">
@@ -441,7 +447,8 @@ export default {
       cities   :[],
       hotCities:[],
       userInfo : {
-        mobile :'13'
+        mobile :'13',
+        openId :'',
       },
       orderInfo: {
         city: {
@@ -454,6 +461,7 @@ export default {
         },
         quantity:1,
         mobile:'13131313131',
+        orderId:' ',
       },
       contractInfo: {
         payout:0,
@@ -548,9 +556,6 @@ export default {
       return pinyinUtil.getFirstLetter(word)
     },
     eventTest(e) {
-      // this.$store.commit('showMessageDialog', {text:'sdf'})
-      this.citySelectorDialog.show = true;
-      // console.log(e.target.value)
     },
     parseDateToString(date) {
       let month=date.getMonth()+1, day=date.getDate();
@@ -667,7 +672,7 @@ export default {
         cityId:this.orderInfo.city.id,
         stime:this.parseDateForParam(this.orderInfo.date.from),
         etime:this.parseDateForParam(this.orderInfo.date.to),
-        openid:this.openId
+        openid:this.userInfo.openId
       })
       .then(resp=>{
         if ( resp.state !== 1 ) return this.$store.commit('showMessageDialog', {type:'failure', text:resp.message})
@@ -686,10 +691,6 @@ export default {
         this.getContract();
       }
       this.citySelectorDialog.show = false;
-    },
-    onCityDialogScroll(e) {
-      // console.log(e.target.scrollTop);
-      this.citySelectorDialog.keyword = e.target.scrollTop;
     },
     searchCity() {
       console.log('ss')
@@ -736,10 +737,54 @@ export default {
           })
         })
         this.cities = allCities;
+
+        this.$nextTick(()=>{
+          this.initCityListScroll()
+        });
       })
       .catch(err => {
         console.log(err)
       })
+    },
+    initCityListScroll() {
+      let wrapper = this.$refs.cityList,
+          anchors = [].map.call(wrapper.querySelectorAll('#all-cities h3'), (e,i)=> {
+            return { elem:e, top:e.offsetTop, idx:i };
+          }),
+          fixedAnchor = this.$refs.fixedAnchor;
+
+      let prevTop=0, currTop=0, top, idx=-1, dirUp, timer;
+      let s,m,e;
+      wrapper.addEventListener('scroll', (e)=> {
+        currTop = wrapper.scrollTop;
+        if ( currTop>prevTop ) { 
+          if ( currTop>=anchors[idx+1].top ) {
+            idx += 1;
+            fixedAnchor.classList.add('show');
+            fixedAnchor.textContent = anchors[idx].elem.textContent;
+          }
+        } else { 
+          if ( currTop<anchors[idx].top ) {
+            idx -= 1;
+            if ( idx === -1 ) {
+              fixedAnchor.classList.remove('show');
+            } else {
+              fixedAnchor.classList.add('show');
+              fixedAnchor.textContent = anchors[idx].elem.textContent;
+            }
+          }
+        }
+
+        prevTop = currTop;
+        // console.log( e.delta )
+        clearTimeout(timer);
+        timer = setTimeout(()=>{
+          top = wrapper.scrollTop;
+          this.citySelectorDialog.keyword = top;
+        }, 50);
+      });
+      // console.log( anchors );
+      // console.log(wrapper);
     },
     wechatPay() {
       this.$http.post('pay_wechat_test', {
@@ -786,8 +831,8 @@ export default {
     }
   },
   created () {
-    this.loadCityData();
-    this.getContract();
+    // this.loadCityData();
+    // this.getContract();
 
     let config  = this.config;
     let dateFrom = new Date(),
@@ -809,9 +854,9 @@ export default {
     };
   },
   mounted() {
-    // if ( typeof window==='object' ) {
     this.mounted = true;
-    // }
+    this.loadCityData();
+    this.getContract();
 
     // this.$http.get('getOpenId')
     //   .then(resp=>{
