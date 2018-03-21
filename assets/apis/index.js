@@ -8,5 +8,6 @@ module.exports = {
   checkCouponCode:'sellerMerchant/findCoupons',
   getOpenId:'http://m.baotianqi.cn/weixin/getOpenid',
   pay_wechat_test:'payment/wechat/test',
-  pay_wechat:'http://pay.baotianqi.cn/wxpay/jsapipay/'
+  pay_wechat:'http://pay.baotianqi.cn/wxpay/jsapipay/',
+  getPaymentOption: 'http://pay.baotianqi.cn/wxpay/toJsapipay/'
 }
