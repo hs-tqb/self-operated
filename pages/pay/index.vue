@@ -803,13 +803,25 @@ export default {
         prevTop = currTop;
       }
     },
-    wechatPay() {
+    async wechatPay() {
+      
+      if ( !this.orderInfo.openId ) {
+        await this.$http.post('getOpenId')
+        .then(resp=>{
+          if ( resp.state !== 1 ) 
+          return this.$store.commit('showMessageDialog', {type:'failure', text:resp.message});
+          this.orderInfo.openId = resp.data.openid;
+        });
+      }
+
       this.$http.post('pay_wechat', {
           // outTradeNo: this.contractInfo.contractId,
           // totalFee  : this.computedPayFee * 100,
           outTradeNo:'sdf9ksdjhsdl',
           totalFee  : 1,
-          body      : '自营降雨'
+          body      : '自营降雨',
+          returnUrl : 'w.baotianqi.cn',
+          openid    : this.orderInfo.openId,
         })
         .then(resp=>{
           // console.log( resp )
