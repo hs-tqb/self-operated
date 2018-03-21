@@ -221,6 +221,7 @@
 </style>
 <template>
   <div id="page-home" @click="" v-if="ready">
+    <a href="http://m.baotianqi.cn/weixin/getOpenid"><br>测试链接</a>
     <div id="gift">
       <a class="icon" href="javascript:void(0)"></a>
       <!-- <img src="~/assets/img/icons/gift.png" alt=""> -->
