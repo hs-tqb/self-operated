@@ -10,6 +10,10 @@
       height:100%;
       background-color:#fff;
       overflow:hidden;
+      .fixedAnchor { 
+        position:fixed; top:50px; left:0; z-index:10; width:100%; opacity:0;
+        &.show { opacity:1; }
+      }
     }
     .inner-wrapper {
       position:relative;
@@ -20,11 +24,6 @@
       // &.list-wrapper {
       //   padding:25px 0;
       // }
-      .fixedAnchor { 
-        position:fixed; top:50px; left:0; width:100%; opacity:0;
-        &.show { opacity:1; }
-      }
-
     }
     h3 { padding:0 @gap-n; line-height:26px; background-color:@color-border-lighter; }
     #city-search-box {
@@ -330,8 +329,8 @@
           </div>
         </template>
         <template v-else>
+          <h3 class="fixedAnchor" ref="fixedAnchor"></h3>
           <div class="inner-wrapper list-wrapper" ref="cityList">
-            <h3 class="fixedAnchor" ref="fixedAnchor"></h3>
             <div id="hot-cities">
               <h3>热门城市</h3>
               <ul class="list">
@@ -748,43 +747,53 @@ export default {
     },
     initCityListScroll() {
       let wrapper = this.$refs.cityList,
-          anchors = [].map.call(wrapper.querySelectorAll('#all-cities h3'), (e,i)=> {
-            return { elem:e, top:e.offsetTop, idx:i };
-          }),
+          anchors = [].map.call(
+            wrapper.querySelectorAll('#all-cities h3'), 
+            (e,i)=>true&& {elem:e,top:e.offsetTop,idx:i}
+          ),
           fixedAnchor = this.$refs.fixedAnchor;
 
-      let prevTop=0, currTop=0, top, idx=-1, dirUp, timer;
-      let s,m,e;
+      let prevTop=0, currTop=0, idx=-1, maxIdx=anchors.length-1, timer;
       wrapper.addEventListener('scroll', (e)=> {
+        clearTimeout(timer);
         currTop = wrapper.scrollTop;
         if ( currTop>prevTop ) { 
-          if ( currTop>=anchors[idx+1].top ) {
-            idx += 1;
+          // 向上滑动
+          if ( idx<maxIdx && currTop>=anchors[idx+1].top ) {
             fixedAnchor.classList.add('show');
-            fixedAnchor.textContent = anchors[idx].elem.textContent;
+            fixedAnchor.textContent = anchors[++idx].elem.textContent;
           }
         } else { 
+          // 向下滑动
           if ( currTop<anchors[idx].top ) {
-            idx -= 1;
-            if ( idx === -1 ) {
+            if ( idx === 0 ) {
               fixedAnchor.classList.remove('show');
             } else {
-              fixedAnchor.classList.add('show');
-              fixedAnchor.textContent = anchors[idx].elem.textContent;
+              fixedAnchor.textContent = anchors[--idx].elem.textContent;
             }
           }
         }
-
         prevTop = currTop;
-        // console.log( e.delta )
+
+        // 做个补偿
         clearTimeout(timer);
-        timer = setTimeout(()=>{
-          top = wrapper.scrollTop;
-          this.citySelectorDialog.keyword = top;
-        }, 50);
+        timer = setTimeout(compensator, 50);
       });
-      // console.log( anchors );
-      // console.log(wrapper);
+      // 补偿
+      function compensator() {
+        currTop = wrapper.scrollTop;
+        anchors.some((a,i)=>{
+          if (a.top > currTop) {
+            if ( (idx=i-1)===-1 ) {
+              fixedAnchor.classList.remove('show');
+            } else {
+              fixedAnchor.textContent = anchors[idx].elem.textContent || 'xxx';
+            }
+            return true;
+          }
+        })
+        prevTop = currTop;
+      }
     },
     wechatPay() {
       this.$http.post('pay_wechat_test', {
