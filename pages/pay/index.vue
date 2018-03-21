@@ -359,7 +359,7 @@
           </div>
           <ul id="anchors">
             <li v-for="(s,i) in cities" 
-              @click="scrollToAnchor(s.letter)"
+              @click="scrollToAnchor(s, i)"
               :key="`aca${i}`"
             >{{s.letter}}</li>
             <!-- <li v-for="(s,i) in 26" 
@@ -696,10 +696,11 @@ export default {
         this.citySelectorDialog.keyword = e.target.value.trim();
       }, 300);
     },
-    scrollToAnchor (name) {
+    scrollToAnchor (s, i) {
       this.stopScrollEvent = true;
-      this.$refs.fixedAnchor.textContent = name;
-      this.$refs['letter-'+name][0].scrollIntoView()
+      this.stopScrollIndex = i;
+      this.$refs.fixedAnchor.textContent = s.letter;
+      this.$refs['letter-'+s.letter][0].scrollIntoView()
       // this.stopScrollEvent = false;
     },
     loadCityData() {
@@ -758,6 +759,7 @@ export default {
       wrapper.addEventListener('scroll', (e)=> {
         if ( this.stopScrollEvent ) {
           this.stopScrollEvent=false;
+          idx = this.stopScrollIndex;
           return;
         }
         clearTimeout(timer);
