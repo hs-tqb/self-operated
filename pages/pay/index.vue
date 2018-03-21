@@ -832,7 +832,7 @@ export default {
         });
 
 
-      alert( typeof option==='object'? JSON.stringify(option): option );
+      alert( typeof option.data==='object'? JSON.stringify(option.data): option.data );
 
       function onBridgeReady(){
         WeixinJSBridge.invoke(
@@ -845,7 +845,7 @@ export default {
           //     "paySign":'${paySign}' //微信签名 
           // },
           'getBrandWCPayRequest', 
-          option,
+          { ...option.data },
           function(res){
             alert(str);
             if(res.err_msg == "get_brand_wcpay_request:ok" ) {
