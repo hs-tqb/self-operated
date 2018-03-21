@@ -832,7 +832,7 @@ export default {
         }).data;
 
 
-      // alert( typeof option==='object'? JSON.stringify(option): option );
+      alert( typeof option==='object'? JSON.stringify(option): option );
 
       function onBridgeReady(){
         WeixinJSBridge.invoke(
