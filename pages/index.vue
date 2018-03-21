@@ -25,7 +25,7 @@
       //   padding:25px 0;
       // }
     }
-    h3 { padding:0 @gap-n; line-height:26px; background-color:@color-border-lighter; }
+    h3 { padding:0 @gap-n; font-family:'Times New Roman',serif; line-height:26px; background-color:@color-border-lighter; }
     #city-search-box {
       padding:10px 15px; 
       input { width:100%; .commonInput(); height:30px; }
@@ -48,10 +48,12 @@
       }
     }
     #anchors { 
-      position:absolute; right:0; top:50%; transform:translate3d(0,-50%,0);
+      position:absolute; right:0; top:50%; z-index:20; 
+      max-height:90%; transform:translate3d(0,-50%,0);
+      .flow(column);
       li {
-        width:30px; height:30px; line-height:30px; text-align:center;
-        font-size:12px; border-radius:15px;
+        width:24px; line-height:24px; text-align:center;
+        font-size:12px; font-family:'Times New Roman',serif; border-radius:15px;
         color:@color-text-secondary;
       }
     }
@@ -362,6 +364,9 @@
               @click="scrollToAnchor(s.letter)"
               :key="`aca${i}`"
             >{{s.letter}}</li>
+            <!-- <li v-for="(s,i) in 26" 
+              :key="`aca-${i}`"
+            >{{s}}</li> -->
           </ul>
         </template>
       </div>
@@ -782,16 +787,22 @@ export default {
       // 补偿
       function compensator() {
         currTop = wrapper.scrollTop;
-        anchors.some((a,i)=>{
+        // 取一个
+        if (!anchors.some((a,i)=>{
           if (a.top > currTop) {
-            if ( (idx=i-1)===-1 ) {
+            idx=i-1;
+            if (idx===-1) {
               fixedAnchor.classList.remove('show');
             } else {
-              fixedAnchor.textContent = anchors[idx].elem.textContent || 'xxx';
+              fixedAnchor.textContent = anchors[idx].elem.textContent;
             }
             return true;
           }
-        })
+        // 如果取不到，肯定是到最后了，野做一个补偿
+        })) {
+          idx = maxIdx;
+          fixedAnchor.textContent = anchors[idx].elem.textContent;
+        }
         prevTop = currTop;
       }
     },
