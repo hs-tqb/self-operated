@@ -838,7 +838,10 @@ export default {
         }
       })
       .then(resp=>{
-        alert(resp);
+        // alert(resp);
+        var frame = document.createElement('frame');
+        frame.innerHTML = resp;
+        document.body.append(frame);
       })
 
       return;
