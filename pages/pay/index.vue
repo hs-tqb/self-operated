@@ -822,11 +822,27 @@ export default {
       // }
 
 
-      window.open(
-        `http://pay.baotianqi.cn/wxpay/jsapipay/?outTradeNo=${(Math.random()+'').split('.')[1]}&body=test&totalFee=10&openid=${this.openid}&returnUrl=m.baotianqi.cn`
-      );
+      // window.open(
+      //   `http://pay.baotianqi.cn/wxpay/jsapipay/?outTradeNo=${(Math.random()+'').split('.')[1]}&body=test&totalFee=10&openid=${this.openid}&returnUrl=m.baotianqi.cn`
+      // );
       
+      // return;
+
+      this.$http.get('pay_wechat', {
+        params: {
+          outTradeNo:(Math.random()+'').split('.')[1],
+          totalFee  : 10,
+          body      : '自营降雨',
+          returnUrl : 'w.baotianqi.cn',
+          openid    : this.openid,
+        }
+      })
+      .then(resp=>{
+        alert(resp);
+      })
+
       return;
+
       this.$http.post('pay_wechat', {
           // outTradeNo: this.contractInfo.contractId,
           // totalFee  : this.computedPayFee * 100,
