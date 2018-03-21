@@ -829,10 +829,10 @@ export default {
           body      : '自营降雨',
           returnUrl : 'w.baotianqi.cn',
           openid    : this.openid,
-        });
+        }).data;
 
 
-      alert( typeof option==='object'? JSON.stringify(option): option );
+      // alert( typeof option==='object'? JSON.stringify(option): option );
 
       function onBridgeReady(){
         WeixinJSBridge.invoke(
@@ -858,10 +858,10 @@ export default {
       
       if (typeof WeixinJSBridge == "undefined"){
         if( document.addEventListener ){
-            document.addEventListener('WeixinJSBridgeReady', onBridgeReady, false);
+          document.addEventListener('WeixinJSBridgeReady', onBridgeReady, false);
         }else if (document.attachEvent){
-            document.attachEvent('WeixinJSBridgeReady', onBridgeReady);
-            document.attachEvent('onWeixinJSBridgeReady', onBridgeReady);
+          document.attachEvent('WeixinJSBridgeReady', onBridgeReady);
+          document.attachEvent('onWeixinJSBridgeReady', onBridgeReady);
         }
       }else{
         onBridgeReady();
