@@ -443,7 +443,9 @@ export default {
       orderDaysLimitMin:3
     };
 
-    return { config }
+    let openid = ctx.query.openid;
+
+    return { config, openid }
   },
   data () {
     return {
@@ -806,18 +808,18 @@ export default {
     },
     async wechatPay() {
       
-      if ( !this.orderInfo.openId ) {
-        await this.$http.post('getOpenId')
-        .then(resp=>{
-          if ( resp.state !== 1 ) 
-          return this.$store.commit('showMessageDialog', {type:'failure', text:resp.message});
-          this.orderInfo.openId = resp.data.openid;
-        })
-        .catch(err=>{
-          // this.$store.commit('showMessageDialog', {type:'failure', text:JSON.stringify(err)});
-          alert( err );
-        })
-      }
+      // if ( !this.orderInfo.openId ) {
+      //   await this.$http.get('getOpenId')
+      //   .then(resp=>{
+      //     if ( resp.state !== 1 ) 
+      //     return this.$store.commit('showMessageDialog', {type:'failure', text:resp.message});
+      //     this.orderInfo.openId = resp.data.openid;
+      //   })
+      //   .catch(err=>{
+      //     // this.$store.commit('showMessageDialog', {type:'failure', text:JSON.stringify(err)});
+      //     alert( err );
+      //   })
+      // }
 
       this.$http.post('pay_wechat', {
           // outTradeNo: this.contractInfo.contractId,
@@ -826,7 +828,7 @@ export default {
           totalFee  : 1,
           body      : '自营降雨',
           returnUrl : 'w.baotianqi.cn',
-          openid    : this.orderInfo.openId,
+          openid    : this.openid,
         })
         .then(resp=>{
           // console.log( resp )
