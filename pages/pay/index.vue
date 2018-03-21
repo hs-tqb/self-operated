@@ -829,7 +829,7 @@ export default {
           body      : '自营降雨',
           returnUrl : 'w.baotianqi.cn',
           openid    : this.openid,
-        }).data;
+        });
 
 
       alert( typeof option==='object'? JSON.stringify(option): option );
