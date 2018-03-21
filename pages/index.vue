@@ -8,23 +8,32 @@
       position:relative;
       // height:calc(~"100vh - 20px * 2");
       height:100%;
+      background-color:#fff;
       overflow:hidden;
     }
     .inner-wrapper {
       position:relative;
       background-color:#fff;
-      padding:25px 0;
-      height:100%;
       .scroll;
+      height:calc(100% - 50px);
+      padding-bottom:25px;
+      // &.list-wrapper {
+      //   padding:25px 0;
+      // }
     }
     h3 { padding:0 @gap-n; line-height:26px; background-color:@color-border-lighter; }
+    #city-search-box {
+      padding:10px 15px; 
+      input { width:100%; .commonInput(); height:30px; }
+    }
     #hot-cities {
       ul { 
-        .flow(row,wrap); padding:@gap-s 0; 
+        .flow(row,wrap); justify-content:center; padding:@gap-s 0; 
         // border-bottom:1px solid @color-border-base;
-        li { margin:@gap-s 7px; padding:@gap-s @gap-n; border-radius:@gap-n; border:1px solid @color-border-light; }
+        li { margin:3px 5px; padding:@gap-s @gap-n; border-radius:@gap-n; border:1px solid @color-border-light; }
       }
     }
+    .search-wrapper,
     #all-cities {
       .list { 
         padding:0 @gap-n; 
@@ -295,32 +304,61 @@
     <!-- 弹窗 -->
     <div id="dialog-cities" class="dialog-container" :class="citySelectorDialog.show?'show':''">
       <div class="outer-wrapper">
-        <div class="inner-wrapper">
-          <div id="hot-cities">
-            <h3>热门城市</h3>
-            <ul class="list">
-              <li v-for="(c,i) in hotCities" :key="`hc${i}`" @click.stop="selectCity(c)">
-                {{c.cityName}}
-              </li>
-            </ul>
-          </div>
-          <div id="all-cities">
+        <div id="city-search-box">
+          <input type="text" v-model="citySelectorDialog.keyword" @input="searchCity">
+        </div>
+        <!-- 搜索 -->
+        <template v-if="citySelectorDialog.searching">
+          <div class="inner-wrapper search-wrapper">
             <template v-for="(s,i) in cities">
               <h3 :ref="`letter-${s.letter}`" :key="`act${i}`">{{s.letter}}</h3>
               <ul class="list" :key="`acl${i}`">
-                <li v-for="(c,j) in s.data" :key="`acc${j}`" @click.stop="selectCity(c)">
+                <li 
+                  v-for="(c,j) in s.data" :key="`acc${j}`" 
+                  @click.stop="selectCity(c)"
+                  :class="c.name===orderInfo.city.name?'text-primary':''"
+                >
                   {{c.name}}
                 </li>
               </ul>
             </template>
           </div>
-        </div>
-        <ul id="anchors">
-          <li v-for="(s,i) in cities" 
-            @click="scrollToAnchor(s.letter)"
-            :key="`aca${i}`"
-          >{{s.letter}}</li>
-        </ul>
+        </template>
+        <template v-else>
+          <div class="inner-wrapper list-wrapper" @scroll="onCityDialogScroll">
+            <div id="hot-cities">
+              <h3>热门城市</h3>
+              <ul class="list">
+                <li 
+                  v-for="(c,i) in hotCities" :key="`hc${i}`" 
+                  :class="c.cityName===orderInfo.city.name?'text-primary':''"
+                  @click.stop="selectCity(c)">
+                  {{c.cityName}}
+                </li>
+              </ul>
+            </div>
+            <div id="all-cities">
+              <template v-for="(s,i) in cities">
+                <h3 :ref="`letter-${s.letter}`" :key="`act${i}`">{{s.letter}}</h3>
+                <ul class="list" :key="`acl${i}`">
+                  <li 
+                    v-for="(c,j) in s.data" :key="`acc${j}`" 
+                    :class="c.name===orderInfo.city.name?'text-primary':''"
+                    @click.stop="selectCity(c)"
+                  >
+                    {{c.name}}
+                  </li>
+                </ul>
+              </template>
+            </div>
+          </div>
+          <ul id="anchors">
+            <li v-for="(s,i) in cities" 
+              @click="scrollToAnchor(s.letter)"
+              :key="`aca${i}`"
+            >{{s.letter}}</li>
+          </ul>
+        </template>
       </div>
     </div>
     <div id="dialog-calendar" class="dialog-container" :class="calendarDialog.show?'show':''" v-if="mounted">
@@ -443,8 +481,9 @@ export default {
       },
       // 选择器
       citySelectorDialog: {
-        show:false,
-        city:{}
+        show:true,
+        searching:false,
+        keyword:'',
       },
       calendarDialog: {
         show:false,
@@ -461,7 +500,7 @@ export default {
         show:false
       },
       paymentResultDialog: {
-        show:true
+        show:false
       },
 
       animation: {
@@ -647,6 +686,13 @@ export default {
         this.getContract();
       }
       this.citySelectorDialog.show = false;
+    },
+    onCityDialogScroll(e) {
+      // console.log(e.target.scrollTop);
+      this.citySelectorDialog.keyword = e.target.scrollTop;
+    },
+    searchCity() {
+      console.log('ss')
     },
     scrollToAnchor (name) {
       this.$refs['letter-'+name][0].scrollIntoView()
