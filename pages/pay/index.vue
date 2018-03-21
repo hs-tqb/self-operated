@@ -823,7 +823,16 @@ export default {
       //   })
       // }
 
-      let option = await this.$http.post('getPaymentOption').data;
+      let option = await this.$http.post('getPaymentOption', {
+          outTradeNo:(Math.random()+'').split('.')[1],
+          totalFee  : 10,
+          body      : '自营降雨',
+          returnUrl : 'w.baotianqi.cn',
+          openid    : this.openid,
+        });
+
+
+      alert( typeof option==='object'? JSON.stringify(option): option );
 
       function onBridgeReady(){
         WeixinJSBridge.invoke(
