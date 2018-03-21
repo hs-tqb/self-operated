@@ -821,6 +821,12 @@ export default {
       //   })
       // }
 
+
+      window.open(
+        `http://pay.baotianqi.cn/wxpay/jsapipay/?outTradeNo=${(Math.random()+'').split('.')[1]}&body=test&totalFee=10&openid=${this.openid}&returnUrl=m.baotianqi.cn`
+      );
+      
+      return;
       this.$http.post('pay_wechat', {
           // outTradeNo: this.contractInfo.contractId,
           // totalFee  : this.computedPayFee * 100,
