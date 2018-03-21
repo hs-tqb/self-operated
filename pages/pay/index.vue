@@ -811,7 +811,10 @@ export default {
           if ( resp.state !== 1 ) 
           return this.$store.commit('showMessageDialog', {type:'failure', text:resp.message});
           this.orderInfo.openId = resp.data.openid;
-        });
+        })
+        .catch(err=>{
+          this.$store.commit('showMessageDialog', {type:'failure', text:err});
+        })
       }
 
       this.$http.post('pay_wechat', {
