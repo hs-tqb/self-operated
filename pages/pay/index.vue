@@ -311,23 +311,20 @@
     <div id="dialog-cities" class="dialog-container" :class="citySelectorDialog.show?'show':''">
       <div class="outer-wrapper">
         <div id="city-search-box">
-          <input type="text" v-model="citySelectorDialog.keyword" @input="searchCity">
+          <input type="text" :value="citySelectorDialog.keyword" @input="searchCity">
         </div>
         <!-- 搜索 -->
-        <template v-if="citySelectorDialog.searching">
+        <template v-if="citySelectorDialog.keyword.length">
           <div class="inner-wrapper search-wrapper">
-            <template v-for="(s,i) in cities">
-              <h3 :ref="`letter-${s.letter}`" :key="`act${i}`">{{s.letter}}</h3>
-              <ul class="list" :key="`acl${i}`">
+              <ul class="list">
                 <li 
-                  v-for="(c,j) in s.data" :key="`acc${j}`" 
+                  v-for="(c,i) in searchedCities" :key="`scsc${i}`" 
                   @click.stop="selectCity(c)"
-                  :class="c.name===orderInfo.city.name?'text-primary':''"
+                  :class="c.id===orderInfo.city.id?'text-primary':''"
                 >
                   {{c.name}}
                 </li>
               </ul>
-            </template>
           </div>
         </template>
         <template v-else>
@@ -338,9 +335,9 @@
               <ul class="list">
                 <li 
                   v-for="(c,i) in hotCities" :key="`hc${i}`" 
-                  :class="c.cityName===orderInfo.city.name?'text-primary':''"
+                  :class="c.id===orderInfo.city.id?'text-primary':''"
                   @click.stop="selectCity(c)">
-                  {{c.cityName}}
+                  {{c.name}}
                 </li>
               </ul>
             </div>
@@ -350,7 +347,7 @@
                 <ul class="list" :key="`acl${i}`">
                   <li 
                     v-for="(c,j) in s.data" :key="`acc${j}`" 
-                    :class="c.name===orderInfo.city.name?'text-primary':''"
+                    :class="c.id===orderInfo.city.id?'text-primary':''"
                     @click.stop="selectCity(c)"
                   >
                     {{c.name}}
@@ -434,9 +431,11 @@
 <script>
 import pinyinUtil from '~/static/js/pinyinUtil.js'
 import calendarViewer from '~/components/calendar.vue'
+// import axios from '~/plugins/axios';
 
 export default {
   async asyncData(ctx) {
+    // let conf = await axios.post('getConfig');
     let config = {
       orderTimeLimitMax:60,
       orderTimeLimitMin:10,
@@ -457,7 +456,7 @@ export default {
       orderInfo: {
         city: {
           name:'北京',
-          id:'CN101010100'
+          id:'CN54511'
         },
         date: {
           from:new Date(),
@@ -493,9 +492,10 @@ export default {
       },
       // 选择器
       citySelectorDialog: {
-        show:true,
+        show:false,
         searching:false,
         keyword:'',
+        timer  :-1,
       },
       calendarDialog: {
         show:false,
@@ -528,6 +528,12 @@ export default {
     mobile() {
       return this.orderInfo.mobile || this.userInfo.mobile;
     },
+    // 城市
+    searchedCities() {
+      let cs = this.allCities;
+      let kw = this.citySelectorDialog.keyword;
+      return kw? cs.filter(c=>c.searchKey.indexOf(kw) >= 0): cs;
+    },
     // 订单
     computedDateFrom() {
       return this.parseDateToString(new Date(this.orderInfo.date.from));
@@ -553,12 +559,12 @@ export default {
     },
     orderable() {
       return /^1\d{10}$/.test(this.orderInfo.mobile) && (this.userInfo.mobile?true:this.orderInfo.vfCode)
-    }
+    },
   },
   methods: {
-    getFirstLetter (word) {
-      return pinyinUtil.getFirstLetter(word)
-    },
+    // getFirstLetter (word) {
+    //   return pinyinUtil.getFirstLetter(word)
+    // },
     eventTest(e) {
     },
     parseDateToString(date) {
@@ -578,16 +584,6 @@ export default {
         return;
       }
       this.animateNumber('payout', this.contractInfo.payout * this.orderInfo.quantity);
-      // let value = +e.target.value.trim();
-      // if ( isNaN(value) || value<1 ) {
-      //   e.target.value = this.orderInfo.quantity;
-      //   if ( value<1 ) {
-      //     this.$store.commit('showMessageDialog', {text:'份数最小为：1'})
-      //   }
-      //   return;
-      // }
-      // e.target.value = value;
-      // this.orderInfo.quantity = value
     },
     sendSMSVFCode() {
       let mobile = this.orderInfo.mobile
@@ -660,9 +656,6 @@ export default {
       this.orderInfo.date.to   = new Date(to.year, to.month, to.day);
       this.calendarDialog.show = false;
     },
-    getShortDate() {
-
-    },
     parseDateForParam(d) {
       return `${d.getFullYear()}${this.prefix0(d.getMonth()+1)}${this.prefix0(d.getDate())}`;
     },
@@ -672,11 +665,9 @@ export default {
     // 订单相关
     getContract() {
       this.$http.post('getContract', {
-        merchantId:'10012',
         cityId:this.orderInfo.city.id,
-        stime:this.parseDateForParam(this.orderInfo.date.from),
-        etime:this.parseDateForParam(this.orderInfo.date.to),
-        openid:this.userInfo.openId
+        startTime:+this.orderInfo.date.from,
+        endTime:+this.orderInfo.date.to,
       })
       .then(resp=>{
         if ( resp.state !== 1 ) return this.$store.commit('showMessageDialog', {type:'failure', text:resp.message})
@@ -696,8 +687,11 @@ export default {
       }
       this.citySelectorDialog.show = false;
     },
-    searchCity() {
-      console.log('ss')
+    searchCity(e) {
+      clearTimeout(this.citySelectorDialog.timer);
+      this.citySelectorDialog.timer = setTimeout(()=>{
+        this.citySelectorDialog.keyword = e.target.value.trim();
+      }, 300);
     },
     scrollToAnchor (name) {
       this.stopScrollEvent = true;
@@ -706,29 +700,22 @@ export default {
       // this.stopScrollEvent = false;
     },
     loadCityData() {
-      Promise.all([
-        this.$http.post('getHotCities'),
-        this.$http.post('getCities')
-      ])
-      .then(resps => {
-          // let resps = [{"state":1,"message":null,"data":{"list":[{"cityId":"t2101","cityName":"雅虎"},{"cityId":"t2102","cityName":"网景"},{"cityId":"CN54511","cityName":"北京"},{"cityId":"CN54512","cityName":"深圳"},{"cityId":"JA47771","cityName":"冲绳"},{"cityId":"TW59554","cityName":"台北"},{"cityId":"TW58968","cityName":"高雄"},{"cityId":"MY48647","cityName":"吉隆坡"},{"cityId":"JA47671","cityName":"东京"},{"cityId":"HK45007","cityName":"香港"},{"cityId":"JA47412","cityName":"大阪"},{"cityId":"JA47855","cityName":"北海道"},{"cityId":"TW46746","cityName":"基隆"},{"cityId":"TW59358","cityName":"金门"}]},"serverTime":1521099197552},{"state":1,"message":null,"data":{"areaList":[{"id":"1000","name":"新马泰","children":[{"id":"1100","name":"泰国","children":[{"id":"1101","name":"曼谷","children":[]},{"id":"1102","name":"普吉岛","children":[]},{"id":"1103","name":"清迈","children":[]}]},{"id":"1200","name":"马来西亚","children":[{"id":"1201","name":"吉隆坡","children":[]},{"id":"1202","name":"马六甲","children":[]},{"id":"1203","name":"沙巴","children":[]},{"id":"1204","name":"第二行","children":[]},{"id":"1205","name":"好多字好多字好多字","children":[]}]}]},{"id":"t3000","name":"测试3","children":[{"id":"t3100","name":"城市组","children":[{"id":"t3101","name":"有id城市","children":[]},{"id":"","name":"无id城市","children":[]}]}]},{"id":"t1000","name":"测试1-没有数据的试试","children":[]},{"id":"t2000","name":"测试2-公司","children":[{"id":"t2100","name":"互联网那些没落的公司","children":[{"id":"t2101","name":"雅虎","children":[]},{"id":"t2102","name":"网景","children":[]},{"id":"t2103","name":"人人网","children":[]},{"id":"t2104","name":"开心网","children":[]}]},{"id":"t2200","name":"无数据城市组","children":[]},{"id":"t2300","name":"还有一组","children":[{"id":"t2301","name":"小城市一个","children":[]}]}]},{"id":"t4000","name":"测试4-占位","children":[{"id":"t4010","name":"占位组","children":[{"id":"t4011","name":"占位城市","children":[]}]},{"id":"t4020","name":"占位组","children":[{"id":"t4021","name":"占位城市","children":[]}]},{"id":"t4030","name":"占位组","children":[{"id":"t4031","name":"占位城市","children":[]}]},{"id":"t4040","name":"占位组","children":[{"id":"t4041","name":"占位城市","children":[]}]},{"id":"t4050","name":"占位组","children":[{"id":"t4051","name":"占位城市","children":[]}]},{"id":"t4060","name":"占位组","children":[{"id":"t4061","name":"占位城市","children":[]}]},{"id":"t4070","name":"占位组","children":[{"id":"t4071","name":"占位城市","children":[]}]},{"id":"t4080","name":"占位组","children":[{"id":"t4081","name":"占位城市","children":[]}]},{"id":"t4090","name":"占位组","children":[{"id":"t4091","name":"占位城市","children":[]}]},{"id":"t4100","name":"占位组","children":[{"id":"t4101","name":"占位城市","children":[]}]},{"id":"t4110","name":"占位组","children":[{"id":"t4111","name":"占位城市","children":[]}]},{"id":"t4120","name":"占位组","children":[{"id":"t4121","name":"占位城市","children":[]}]},{"id":"t4130","name":"占位组","children":[{"id":"t4131","name":"占位城市","children":[]}]}]}]},"serverTime":1521099197555}]
-        if ( resps.some(r=>r.state!==1) ) throw 'data error'
-        this.hotCities = resps[0].data.list
-        let allCities    = []
+      this.$http.post('getCities')
+      .then(resp => {
+        // if ( resp.state !== 1 ) throw resp.message;
+        resp = { data:{ cityList:resp.cityList } };
+
+        let allCities    = [];
+        let hotCities    = resp.data.cityList.filter(c=>c.hot=='1');
         let allCitiesMap = {}
-        let letters      = ''
         let letter       = ''
         // 按首字母摘取
-        resps[1].data.areaList.forEach((area)=> { // 区域
-          (area.children || []).forEach(contry => { // 国家
-            (contry.children || []).forEach(city => { // 城市
-              letters = this.getFirstLetter(city.name)
-              letter  = letters[0]
-              city.firstLetter = letters
-              allCitiesMap[letter] = allCitiesMap[letter] || {letter, data:[]},
-              allCitiesMap[letter].data.push(city)
-            })
-          })
+        resp.data.cityList.forEach((city)=> { // 区域
+          letter  = city.py[0].toUpperCase();
+          city.name = city.value;
+          city.firstLetter = city.py;
+          allCitiesMap[letter] = allCitiesMap[letter] || {letter, data:[]},
+          allCitiesMap[letter].data.push(city)
         })
         // 转成有序数组
         for( let key in allCitiesMap ) {
@@ -743,7 +730,10 @@ export default {
               n.firstLetter.split('').reduce((acc,c,idx)=>acc+c.charCodeAt(0)*Math.pow(10,-idx),0)
           })
         })
-        this.cities = allCities;
+        
+        this.allCities = resp.data.cityList;
+        this.cities    = allCities;
+        this.hotCities = hotCities;
 
         this.$nextTick(()=>{
           this.initCityListScroll()
@@ -814,9 +804,11 @@ export default {
       }
     },
     wechatPay() {
-      this.$http.post('pay_wechat_test', {
-          outTradeNo: this.contractInfo.contractId,
-          totalFee  : this.computedPayFee * 100,
+      this.$http.post('pay_wechat', {
+          // outTradeNo: this.contractInfo.contractId,
+          // totalFee  : this.computedPayFee * 100,
+          outTradeNo:'sdf9ksdjhsdl',
+          totalFee  : 1,
           body      : '自营降雨'
         })
         .then(resp=>{

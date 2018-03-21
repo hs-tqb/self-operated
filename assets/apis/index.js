@@ -1,9 +1,10 @@
 module.exports = {
-  getCities: 'sellerCity/getCitys',
-  getHotCities: 'sellerCity/getHotCity',
-  addOrder: 'sellerCommon/newAddOrder',
+  getConfig: 'http://test.selfrain.baotianqi.cn/selfrain/init/',
+  getCities: 'http://test.selfrain.baotianqi.cn/selfrain/getCitys/',
+  getContract:'http://test.selfrain.baotianqi.cn/selfrain/getContract',
+  addOrder: 'http://test.selfrain.baotianqi.cn/selfrain/addOrder',
+
   getSMSVFCode: 'sellerCommon/getCode',
-  getContract:'mobile/contract/search',
   checkCouponCode:'sellerMerchant/findCoupons',
   getOpenId:'http://m.baotianqi.cn/weixin/getOpenid',
   pay_wechat_test:'payment/wechat/test',
