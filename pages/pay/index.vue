@@ -807,7 +807,7 @@ export default {
     async wechatPay() {
       
       if ( !this.orderInfo.openId ) {
-        await this.$http.get('getOpenId')
+        await this.$http.post('getOpenId')
         .then(resp=>{
           if ( resp.state !== 1 ) 
           return this.$store.commit('showMessageDialog', {type:'failure', text:resp.message});
