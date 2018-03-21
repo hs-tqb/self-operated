@@ -813,7 +813,7 @@ export default {
           this.orderInfo.openId = resp.data.openid;
         })
         .catch(err=>{
-          this.$store.commit('showMessageDialog', {type:'failure', text:err});
+          this.$store.commit('showMessageDialog', {type:'failure', text:JSON.stringify(err)});
         })
       }
 
