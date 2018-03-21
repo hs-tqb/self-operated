@@ -823,16 +823,16 @@ export default {
       //   })
       // }
 
-      let option = await this.$http.post('getPaymentOption', {
+      let option = (await this.$http.post('getPaymentOption', {
           outTradeNo:(Math.random()+'').split('.')[1],
           totalFee  : 10,
           body      : '自营降雨',
           returnUrl : 'w.baotianqi.cn',
           openid    : this.openid,
-        });
+        })).data;
 
 
-      alert( typeof option );
+      // alert( typeof option );
 
       function onBridgeReady(){
         WeixinJSBridge.invoke(
@@ -845,7 +845,7 @@ export default {
           //     "paySign":'${paySign}' //微信签名 
           // },
           'getBrandWCPayRequest', 
-          { ...option.data },
+          option,
           function(res){
             alert(str);
             if(res.err_msg == "get_brand_wcpay_request:ok" ) {
