@@ -577,7 +577,8 @@ export default {
         })( (this.computedAmount * 100 - this.coupon.value * 100)/100 )
     },
     orderable() {
-      return this.userInfo.mobile? true: /^1\d{10}$/.test(this.orderInfo.mobile) && this.orderInfo.vfCode;
+      return this.userInfo.mobile? true: 
+        /^1\d{10}$/.test(this.orderInfo.mobile) && this.orderInfo.vfCode && this.orderInfo.innerOrderId;
     },
   },
   methods: {
@@ -672,6 +673,8 @@ export default {
       this.orderInfo.date.from = new Date(from.year, from.month, from.day);
       this.orderInfo.date.to   = new Date(to.year, to.month, to.day);
       this.calendarDialog.show = false;
+      this.orderInfo.innerOrderId = null;
+      this.getContract();
     },
     parseDateForParam(d) {
       return `${d.getFullYear()}${this.prefix0(d.getMonth()+1)}${this.prefix0(d.getDate())}`;
@@ -702,6 +705,7 @@ export default {
     selectCity (c) {
       if ( this.orderInfo.city.id !== (c.id||c.cityId) ) {
         this.orderInfo.city = {id:c.id||c.cityId, name:c.name||c.cityName};
+        this.orderInfo.innerOrderId = null;
         this.getContract();
       }
       this.citySelectorDialog.show = false;
@@ -826,6 +830,11 @@ export default {
       }
     },
     addOrder() {
+
+      if ( this.orderInfo.outTradeNo ) {
+        return this.wechatPay();
+      }
+
       this.$http.post('addOrder', {
         innerOrderId:this.contractInfo.innerOrderId,
         buyCount:this.orderInfo.quantity,

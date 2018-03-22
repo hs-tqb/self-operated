@@ -1,9 +1,9 @@
 let config = {
   development: {
-    baseURL: 'http://localhost:5555/'
+    baseURL: 'http://test.selfrain.baotianqi.cn/'
   },
   test: {
-    baseURL: 'http://ts.baotianqi.cn/'
+    baseURL: 'http://test.selfrain.baotianqi.cn/'
   },
   production: {
     baseURL: 'http://web.baotianqi.cn/'
