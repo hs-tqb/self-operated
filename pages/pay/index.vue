@@ -442,7 +442,7 @@ export default {
   async asyncData(ctx) {
     // let conf = await axios.post('getConfig');
     let config = {
-      orderTimeLimitMax:21,
+      orderTimeLimitMax:27,
       orderTimeLimitMin:5,
       orderDaysLimitMin:3
     };
