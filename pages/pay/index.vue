@@ -559,7 +559,7 @@ export default {
     },
     // 合约
     computedPayout() {
-      return this.contractInfo.payoutFee * this.orderInfo.quantity;
+      return this.contractInfo.payoutFee * this.orderInfo.quantity / 100;
     },
     computedPrice() {
       return this.contractInfo.price/100;
@@ -877,7 +877,7 @@ export default {
           'getBrandWCPayRequest', 
           option,
           function(res){
-            if(!res.err_msg == "get_brand_wcpay_request:ok" ) {
+            if(res.err_msg === "get_brand_wcpay_request:ok" ) {
               // window.location.href = "${returnUrl}";
               this.paymentResultDialog.show = true;
             }     
