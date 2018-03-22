@@ -114,7 +114,7 @@
   .inputGap() { padding:0 10px; }
   .commonInput() { height:40px; .inputGap(); .border(around); .radius(); }
   #page-home {
-    background:@bgc url(~assets/img/banner/bg1.jpg) no-repeat center 0;
+    background:@bgc no-repeat center 0;
     background-size:100% auto;
     h5 { margin-bottom:15px; font-size:12px; }
     h4 { margin-bottom:15px; font-size:14px; }
@@ -184,6 +184,7 @@
           // input[type=text] { display:block; .flex(1); }
           .button { .commonInput(); padding:0; }
         }
+        .group + p { margin-top:7px; width:100%; font-size:12px; text-align:center; color:@color-info; } 
       }
       .number-wrapper {
         // .flow;
@@ -220,7 +221,7 @@
   }
 </style>
 <template>
-  <div id="page-home" @click="" v-if="ready">
+  <div id="page-home" @click="" v-if="ready" :style="`background-image:url(${computedBg})`">
     <div id="gift">
       <a class="icon" href="javascript:void(0)"></a>
       <!-- <img src="~/assets/img/icons/gift.png" alt=""> -->
@@ -270,19 +271,22 @@
         <h4>购买信息</h4>
         <input v-if="!!userInfo.mobile" type="text" disabled :value="userInfo.mobile" />
         <input v-else type="text" placeholder="您的手机号" v-model.trim="orderInfo.mobile" />
-        <div class="group" v-if="!userInfo.mobile">
-          <div class="inner-wrapper iw1">
-            <input type="text" placeholder="验证码" v-model.trim="orderInfo.vfCode" />
+        <template v-if="!userInfo.mobile">
+          <div class="group">
+            <div class="inner-wrapper iw1">
+              <input type="text" placeholder="获取验证码" v-model.trim="orderInfo.vfCode" />
+            </div>
+            <div class="inner-wrapper iw2">
+              <input type="button" 
+                class="button text primary" 
+                :disabled="vfCode.disabled" 
+                :value="vfCode.text"
+                @click="sendSMSVFCode"
+              >
+            </div>
           </div>
-          <div class="inner-wrapper iw2">
-            <input type="button" 
-              class="button text primary" 
-              :disabled="vfCode.disabled" 
-              :value="vfCode.text"
-              @click="sendSMSVFCode"
-            >
-          </div>
-        </div>
+          <p>手机号炎症或将会绑定您的微信号，下次购买无须验证</p>
+        </template>
       </div>
     </div>
     <div id="coupon" class="panel" :class="!coupon.collapsed?'card':''" v-if="false">
@@ -386,7 +390,7 @@
           <li><label>保障时间</label>{{formatDateString(orderInfo.date.from)}} 至 {{formatDateString(orderInfo.date.to)}}</li>
           <li><label>保障条件</label>任意单日降水量 > {{contractInfo.threshold}}mm</li>
           <li><label>保障金额</label>{{computedPayout}}元</li>
-          <li><label>手机号</label>{{computedMobile}}</li>
+          <li><label>手机号</label>{{userInfo.mobile || orderInfo.mobile}}</li>
           <li><label>单价</label>{{computedPrice}} 元</li>
           <li><label>份数</label>{{orderInfo.quantity}}</li>
           <!-- <li><label>优惠金额</label>{{coupon.collapsed?0:(coupon.value||0)}} 元</li> -->
@@ -413,7 +417,7 @@
               <span class="text">保障信息</span>
               <span class="border"></span>
             </h3>
-            <ul>
+            <ul v-if="orderInfo.outTradeNo">
               <li><label>订单号</label>{{orderInfo.outTradeNo}}</li>
               <li><label>保障城市</label>{{orderInfo.city.name}}</li>
               <li><label>保障时间</label>{{formatDateString(orderInfo.date.from)}} 至 {{formatDateString(orderInfo.date.to)}}</li>
@@ -437,6 +441,10 @@
 import calendarViewer from '~/components/calendar.vue'
 // import pinyinUtil from '~/static/js/pinyinUtil.js'
 import axios from '~/plugins/axios';
+
+import bg1 from '~/assets/img/banner/bg1.jpg'
+import bg2 from '~/assets/img/banner/bg2.jpg'
+import bg3 from '~/assets/img/banner/bg3.jpg'
 
 export default {
   async asyncData(ctx) {
@@ -538,6 +546,11 @@ export default {
     }
   },
   computed: {
+    computedBg() {
+      let threshold = this.contractInfo.threshold;
+      return threshold>15? bg3:
+              (threshold>5? bg2: bg1 );
+    },
     computedMobile() {
       return this.orderInfo.mobile || this.userInfo.mobile;
     },
@@ -950,7 +963,6 @@ export default {
     //   .catch(err=>{
     //     console.err(err);
     //   })
-
   },
   components: {
     calendarViewer
