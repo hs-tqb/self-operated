@@ -443,7 +443,7 @@ export default {
     // let conf = await axios.post('getConfig');
     let config = {
       orderTimeLimitMax:60,
-      orderTimeLimitMin:10,
+      orderTimeLimitMin:5,
       orderDaysLimitMin:3
     };
 
@@ -853,7 +853,8 @@ export default {
     async wechatPay() {
       let option = (await this.$http.post('getPaymentOption', {
           outTradeNo: this.orderInfo.outTradeNo,
-          totalFee  : this.orderInfo.totalFee,
+          // totalFee  : this.orderInfo.totalFee,
+          totalFee  : 1,
           body      : this.orderInfo.body,
           returnUrl : 'w.baotianqi.cn',
           openid    : this.userInfo.openid,
