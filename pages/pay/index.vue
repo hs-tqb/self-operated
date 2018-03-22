@@ -673,7 +673,8 @@ export default {
       this.orderInfo.date.from = new Date(from.year, from.month, from.day);
       this.orderInfo.date.to   = new Date(to.year, to.month, to.day);
       this.calendarDialog.show = false;
-      this.orderInfo.innerOrderId = null;
+      this.orderInfo.innerOrderId = '';
+      this.orderInfo.outTradeNo   = '';
       this.getContract();
     },
     parseDateForParam(d) {
@@ -705,7 +706,8 @@ export default {
     selectCity (c) {
       if ( this.orderInfo.city.id !== (c.id||c.cityId) ) {
         this.orderInfo.city = {id:c.id||c.cityId, name:c.name||c.cityName};
-        this.orderInfo.innerOrderId = null;
+        this.orderInfo.innerOrderId = '';
+        this.orderInfo.outTradeNo   = '';
         this.getContract();
       }
       this.citySelectorDialog.show = false;
