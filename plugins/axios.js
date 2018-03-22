@@ -57,25 +57,22 @@ instance.interceptors.response.use(
       }
     }
     if (message) {
-      // Message.closeAll();
-      // window.Message = Message;
-      // Message.error({
-      //   dangerouslyUseHTMLString: true,
-      //   showClose:true,
-      //   message: message,
-      //   duration:duration
-      // });
-      console.error(message)
+      showMessage( {type:'failure', text:message} );
+      // throw message;
     }
     return respData
   },
   error => {
-    // Message.error({
-    //   message: error.toString()
-    // })
-    console.error(error.toString())
-    return Promise.reject(error)
+    showMessage( {type:'failure', text:error.toString()} );
+    return { state:0, message:error.toString() }
   }
 )
+
+function showMessage(obj) {
+  if ( typeof global._showMessageDialog === 'undefined' ) {
+    return setTimeout(showMessage,150,obj);
+  }
+  global._showMessageDialog(obj)
+}
 
 export default instance

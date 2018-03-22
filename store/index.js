@@ -26,9 +26,9 @@ const store = ()=>new Vuex.Store({
         dialog.show = false;
       }, obj.delay||dialog.delay);
 
-      dialog.text = obj.text;
       dialog.type = obj.type;
-      dialog.html = obj.html;
+      dialog.html = (obj.html||'').toString().trim();
+      dialog.text = (obj.text||'').toString().trim();
       dialog.show = true;
     }
   }

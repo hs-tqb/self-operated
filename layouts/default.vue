@@ -41,8 +41,8 @@
     <nuxt class="page-container" />
     <!-- 全局消息弹窗 -->
     <div id="dialog-message" class="dialog-container" :class="messageDialog.show?'show':''">
-      <div class="inner-wrapper" :data-type="messageDialog.type||''" v-if="messageDialog.html" v-html="messageDialog.html.trim()"></div>
-      <div class="inner-wrapper" :data-type="messageDialog.type||''" v-else>{{messageDialog.text.trim()}}</div>
+      <div class="inner-wrapper" :data-type="messageDialog.type||''" v-if="messageDialog.html" v-html="messageDialog.html"></div>
+      <div class="inner-wrapper" :data-type="messageDialog.type||''" v-else>{{messageDialog.text}}</div>
     </div>
   </div>
 </template>
@@ -55,8 +55,14 @@ Vue.prototype.$http = axios
 export default {
   computed: {
     messageDialog() {
-      return this.$store.state.messageDialog || {}
+      return this.$store.state.messageDialog
     }
-  }
+  },
+  beforeCreate() {
+    // store 不能互通，绑在global上是最简单的方式
+    global._showMessageDialog = (obj)=>{
+      this.$store.commit('showMessageDialog', obj);
+    }
+  },
 }
 </script>

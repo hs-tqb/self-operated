@@ -159,7 +159,7 @@
         .flow; 
         li:first-child { .flex(1); }
       }
-      .explain { margin-top:10px; line-height:1.4; }
+      .explain { margin-top:12px; font-size:12px; line-height:1.2; }
     }
     #cart {
       // padding:10px; 
@@ -228,7 +228,7 @@
     <div id="options" class="panel">
       <a href="javascript:void(0)" class="large" @click="showCityList">{{orderInfo.city.name}}</a>
       <h5>保障时间</h5>
-      <a href="javascritp:void(0)" @click="calendarDialog.show=true">
+      <a href="javascript:void(0)" @click="calendarDialog.show=true">
         <span class="large">
           {{computedDateFrom}}
         </span> > 
@@ -249,13 +249,13 @@
           <p class="text-left"><span class="large color-primary">{{animation.payout.value}}</span> 元</p>
         </li>
       </ul>
-      <p class="explain">如果北京保障日期内，任意当日累计降水量大于 {{contractInfo.threshold}} mm，则赔付现金红包 {{computedPayout}} 元</p>
+      <p class="explain">如果{{orderInfo.city.name}}保障日期内，任意当日累计降水量大于 {{contractInfo.threshold}} mm，则赔付现金红包 {{computedPayout}} 元。降水量以为{{orderInfo.city.name}}气象站为主（{{orderInfo.city.id.replace(/cn/gi,'')}}）测量数据为准</p>
     </div>
     <div id="cart" class="panel card">
       <ul>
         <li class="">
           <h4>单价</h4>
-          <p> <span class="large color-danger">{{contractInfo.price}}</span> 元</p>
+          <p> <span class="large color-danger">{{computedPrice}}</span> 元</p>
         </li>
         <li class="">
           <h4>份数</h4>
@@ -268,7 +268,8 @@
       </ul>
       <div class="input">
         <h4>购买信息</h4>
-        <input type="text" placeholder="您的手机号" :disabled="!!userInfo.mobile" v-model.trim="orderInfo.mobile" />
+        <input v-if="!!userInfo.mobile" type="text" disabled :value="userInfo.mobile" />
+        <input v-else type="text" placeholder="您的手机号" v-model.trim="orderInfo.mobile" />
         <div class="group" v-if="!userInfo.mobile">
           <div class="inner-wrapper iw1">
             <input type="text" placeholder="验证码" v-model.trim="orderInfo.vfCode" />
@@ -284,14 +285,18 @@
         </div>
       </div>
     </div>
-    <div id="coupon" class="panel" :class="!coupon.collapsed?'card':''">
+    <div id="coupon" class="panel" :class="!coupon.collapsed?'card':''" v-if="false">
       <h4>
         <span class="text-left" v-if="!coupon.collapsed">优惠码</span>
         &nbsp;
         <a 
           href="javascript:void(0)" :class="`text-${coupon.collapsed?'init':coupon.state}`" 
           @click.stop="toggleCouponCodeInput">
-          {{ coupon.collapsed? coupon.text.init: coupon.code+coupon.text[coupon.state]+(coupon.value||'') }}
+          {{ 
+            coupon.collapsed? 
+              coupon.text.init: 
+              coupon.text[coupon.state].replace('$value', coupon.value)
+            }}
         </a>
       </h4>
       <div class="input-wrapper" v-if="!coupon.collapsed">
@@ -381,14 +386,14 @@
           <li><label>保障时间</label>{{formatDateString(orderInfo.date.from)}} 至 {{formatDateString(orderInfo.date.to)}}</li>
           <li><label>保障条件</label>任意单日降水量 > {{contractInfo.threshold}}mm</li>
           <li><label>保障金额</label>{{computedPayout}}元</li>
-          <li><label>手机号</label>{{mobile}}</li>
-          <li><label>单价</label>{{contractInfo.price}} 元</li>
+          <li><label>手机号</label>{{computedMobile}}</li>
+          <li><label>单价</label>{{computedPrice}} 元</li>
           <li><label>份数</label>{{orderInfo.quantity}}</li>
-          <li><label>优惠金额</label>{{coupon.collapsed?0:(coupon.value||0)}} 元</li>
+          <!-- <li><label>优惠金额</label>{{coupon.collapsed?0:(coupon.value||0)}} 元</li> -->
           <li><label>支付总价</label>{{computedPayFee}} 元</li>
         </ul>
         <div class="btn-wrapper">
-          <input type="button" class="button block primary" value="确认支付" @click="wechatPay">
+          <input type="button" class="button block primary" value="确认支付" @click="addOrder">
         </div>
       </div>
     </div>
@@ -409,14 +414,14 @@
               <span class="border"></span>
             </h3>
             <ul>
-              <li><label>订单号</label>{{orderInfo.orderId}}</li>
+              <li><label>订单号</label>{{orderInfo.outTradeNo}}</li>
               <li><label>保障城市</label>{{orderInfo.city.name}}</li>
               <li><label>保障时间</label>{{formatDateString(orderInfo.date.from)}} 至 {{formatDateString(orderInfo.date.to)}}</li>
               <li><label>保障条件</label>任意单日降水量 > {{contractInfo.threshold}}mm</li>
               <li><label>保障金额</label>{{computedPayout}}元</li>
-              <li><label>单价</label>{{contractInfo.price}} 元</li>
+              <li><label>单价</label>{{computedPrice}} 元</li>
               <li><label>份数</label>{{orderInfo.quantity}}</li>
-              <li><label>优惠金额</label>{{coupon.collapsed?0:(coupon.value||0)}} 元</li>
+              <!-- <li><label>优惠金额</label>{{coupon.collapsed?0:(coupon.value||0)}} 元</li> -->
               <li><label>支付总价</label>{{computedPayFee}} 元</li>
             </ul>
             <div class="btn-wrapper">
@@ -429,9 +434,9 @@
   </div>
 </template>
 <script>
-import pinyinUtil from '~/static/js/pinyinUtil.js'
 import calendarViewer from '~/components/calendar.vue'
-// import axios from '~/plugins/axios';
+// import pinyinUtil from '~/static/js/pinyinUtil.js'
+import axios from '~/plugins/axios';
 
 export default {
   async asyncData(ctx) {
@@ -442,19 +447,25 @@ export default {
       orderDaysLimitMin:3
     };
 
-    let openid = ctx.query.openid;
+    let openid = ctx.query.openid  || 'opb1Ft61n4QEwe29QyorjApHAnO8';
+    let mobile;
 
-    return { config, openid }
+    if ( openid ) {
+
+      mobile = (await axios.post('getMobile', {openId:openid})).data;
+      mobile = mobile? mobile.mobile: undefined;
+
+    }
+
+    return { config, userInfo:{openid, mobile} };
   },
   data () {
     return {
       ready    :true,
       cities   :[],
+      allCities:[],
       hotCities:[],
-      userInfo : {
-        mobile :'13',
-        openId :'',
-      },
+      userInfo : {},
       orderInfo: {
         city: {
           name:'北京',
@@ -465,7 +476,7 @@ export default {
           to:new Date(),
         },
         quantity:1,
-        mobile:'13131313131',
+        mobile:'',
         orderId:' ',
       },
       contractInfo: {
@@ -488,8 +499,8 @@ export default {
         text: {
           'init' :'我有优惠码',
           'empty':'优惠金额将在支付时直接抵扣',
-          'success':'，优惠码金额 ￥',
-          'failure':'，优惠码无效'
+          'success':'立减 $value 元',
+          'failure':'优惠码无效'
         }
       },
       // 选择器
@@ -527,12 +538,15 @@ export default {
     }
   },
   computed: {
-    mobile() {
+    computedMobile() {
       return this.orderInfo.mobile || this.userInfo.mobile;
     },
     // 城市
     searchedCities() {
       let cs = this.allCities;
+      console.log('--------------');
+      console.log(cs);
+      console.log('--------------');
       let kw = this.citySelectorDialog.keyword;
       return kw? cs.filter(c=>c.searchKey.indexOf(kw) >= 0): cs;
     },
@@ -545,11 +559,14 @@ export default {
     },
     // 合约
     computedPayout() {
-      return this.contractInfo.payout * this.orderInfo.quantity;
+      return this.contractInfo.payoutFee * this.orderInfo.quantity;
+    },
+    computedPrice() {
+      return this.contractInfo.price/100;
     },
     // 支付
     computedAmount() {
-      return this.contractInfo.price * this.orderInfo.quantity
+      return this.computedPrice * this.orderInfo.quantity
     },
     computedPayFee() {
       // 跟是否使用优惠码,和优惠码的额度有关
@@ -560,7 +577,7 @@ export default {
         })( (this.computedAmount * 100 - this.coupon.value * 100)/100 )
     },
     orderable() {
-      return /^1\d{10}$/.test(this.orderInfo.mobile) && (this.userInfo.mobile?true:this.orderInfo.vfCode)
+      return this.userInfo.mobile? true: /^1\d{10}$/.test(this.orderInfo.mobile) && this.orderInfo.vfCode;
     },
   },
   methods: {
@@ -585,7 +602,8 @@ export default {
       } else {
         return;
       }
-      this.animateNumber('payout', this.contractInfo.payout * this.orderInfo.quantity);
+      
+      this.animateNumber('payout', this.contractInfo.payoutFee * this.orderInfo.quantity / 100);
     },
     sendSMSVFCode() {
       let mobile = this.orderInfo.mobile
@@ -607,14 +625,11 @@ export default {
       // 发送验证码
       this.$http.post('getSMSVFCode', {mobile})
       .then(resp=>{
-        if ( resp.state!==1 ) throw resp.message;
-      })
-      .catch(err=>{
-        this.$store.commit('showMessageDialog', {type:'failure', text:err})
-        this.resetVfCodeSetting();
+        if ( resp.state!==1 ) return this.resetVfCodeSetting();
       })
     },
     resetVfCodeSetting() {
+      clearInterval( this.vfCode.timer );
       this.vfCode.time = 60;
       this.vfCode.disabled = false;
       this.vfCode.text = '发送验证码';
@@ -642,14 +657,14 @@ export default {
       coupon.timer = setTimeout(()=>{
         coupon.code = target.value;
         this.$http.post('checkCouponCode', { 
-          mobile:this.orderInfo.mobile, 
+          mobile:this.computedMobile,
           coupons:coupon.code, 
           productId:10012
         })
         .then(resp=>{
           if ( resp.state!==1 ) return this.$store.commit('showMessageDialog', {type:'failure', text:resp.message})
           coupon.state = resp.data.discountAmount? 'success': 'failure';
-          coupon.value = resp.data.discountAmount? (resp.data.discountAmount/100).toFixed(2): 0;
+          coupon.value = resp.data.discountAmount? (resp.data.discountAmount/100): 0;
         })
       }, coupon.delay)
     },
@@ -668,13 +683,15 @@ export default {
     getContract() {
       this.$http.post('getContract', {
         cityId:this.orderInfo.city.id,
-        startTime:+this.orderInfo.date.from,
-        endTime:+this.orderInfo.date.to,
+        startTime:this.parseDateForParam(this.orderInfo.date.from),
+        endTime:this.parseDateForParam(this.orderInfo.date.to),
+        openId:this.userInfo.openid
       })
       .then(resp=>{
-        if ( resp.state !== 1 ) return this.$store.commit('showMessageDialog', {type:'failure', text:resp.message})
+        if ( resp.state !== 1 ) return;
+        //  this.$store.commit('showMessageDialog', {type:'failure', text:resp.message})
         this.contractInfo = resp.data;
-        this.animateNumber('payout', resp.data.payout);
+        this.animateNumber('payout', resp.data.payoutFee/100);
         this.animateNumber('threshold', resp.data.threshold);
       })
     },
@@ -705,8 +722,7 @@ export default {
     loadCityData() {
       this.$http.post('getCities')
       .then(resp => {
-        // if ( resp.state !== 1 ) throw resp.message;
-        resp = { data:{ cityList:resp.cityList } };
+        if ( resp.state !== 1 ) throw resp.message;
 
         let allCities    = [];
         let hotCities    = resp.data.cityList.filter(c=>c.hot=='1');
@@ -737,6 +753,8 @@ export default {
         this.allCities = resp.data.cityList;
         this.cities    = allCities;
         this.hotCities = hotCities;
+
+        console.log(  )
 
         this.$nextTick(()=>{
           this.initCityListScroll()
@@ -807,31 +825,30 @@ export default {
         prevTop = currTop;
       }
     },
+    addOrder() {
+      this.$http.post('addOrder', {
+        innerOrderId:this.contractInfo.innerOrderId,
+        buyCount:this.orderInfo.quantity,
+        verifyCode:this.orderInfo.vfCode,
+        mobile:this.computedMobile,
+        openid:this.userInfo.openid,
+      })
+      .then(resp=>{
+        if ( resp.state !== 1 ) return;
+        this.orderInfo.outTradeNo = resp.data.outTradeNo;
+        this.orderInfo.totalFee   = resp.data.totalFee;
+        this.orderInfo.body       = resp.data.body;
+        this.wechatPay();
+      })
+    },
     async wechatPay() {
-      
-      // if ( !this.orderInfo.openId ) {
-      //   await this.$http.get('getOpenId')
-      //   .then(resp=>{
-      //     if ( resp.state !== 1 ) 
-      //     return this.$store.commit('showMessageDialog', {type:'failure', text:resp.message});
-      //     this.orderInfo.openId = resp.data.openid;
-      //   })
-      //   .catch(err=>{
-      //     // this.$store.commit('showMessageDialog', {type:'failure', text:JSON.stringify(err)});
-      //     alert( err );
-      //   })
-      // }
-
       let option = (await this.$http.post('getPaymentOption', {
-          outTradeNo:(Math.random()+'').split('.')[1],
-          totalFee  : 10,
-          body      : '自营降雨',
+          outTradeNo: this.orderInfo.outTradeNo,
+          totalFee  : this.orderInfo.totalFee,
+          body      : this.orderInfo.body,
           returnUrl : 'w.baotianqi.cn',
-          openid    : this.openid,
+          openid    : this.userInfo.openid,
         })).data;
-
-
-      // alert( typeof option );
 
       function onBridgeReady(){
         WeixinJSBridge.invoke(
@@ -865,66 +882,6 @@ export default {
       }else{
         onBridgeReady();
       }
-
-
-
-
-      // window.open(
-      //   `http://pay.baotianqi.cn/wxpay/jsapipay/?` + 
-      //   `outTradeNo=${(Math.random()+'').split('.')[1]}&body=test&totalFee=10&openid=${this.openid}&returnUrl=m.baotianqi.cn`
-      // );
-      
-      // return;
-
-      // this.$http.get('pay_wechat', {
-      //   params: {
-      //     outTradeNo:(Math.random()+'').split('.')[1],
-      //     totalFee  : 10,
-      //     body      : '自营降雨',
-      //     returnUrl : 'w.baotianqi.cn',
-      //     openid    : this.openid,
-      //   }
-      // })
-      // .then(resp=>{
-      //   // alert(resp);
-      //   var frame = document.createElement('frame');
-      //   frame.innerHTML = resp;
-      //   document.body.append(frame);
-      // })
-
-      return;
-
-      this.$http.post('pay_wechat', {
-          // outTradeNo: this.contractInfo.contractId,
-          // totalFee  : this.computedPayFee * 100,
-          outTradeNo:(Math.random()+'').split('.')[1],
-          totalFee  : 10,
-          body      : '自营降雨',
-          returnUrl : 'w.baotianqi.cn',
-          openid    : this.openid,
-        })
-        .then(resp=>{
-          // console.log( resp )
-          if ( resp.state === 1 ) {
-            this.paymentResultDialog.show = true;
-          } else {
-            return this.$store.commit('showMessageDialog', {type:'failure', text:'支付失败'});
-          }
-
-
-          // this.payment.wechat.qrcode = resp.data.code_url;
-          // this.$nextTick(()=>{
-          //   CountDown.closeBySign('wxQrcodeLifeCycle');
-          //   CountDown.openTimeCountBySeconds({
-          //       Ele: this.$refs.wxQrcodeLifeCycle,
-          //       CountDownSeconds:30,
-          //       Divider: ':',
-          //       Sign   : 'wxQrcodeLifeCycle',
-          //       EndFunc: function () {
-          //       }
-          //   });
-          // });
-        })
     },
     animateNumber(name, val) {
       let a = this.animation,
