@@ -890,6 +890,7 @@ export default {
           'getBrandWCPayRequest', 
           option,
           function(res){
+            alert(res);
             if(res.err_msg === "get_brand_wcpay_request:ok" ) {
               // window.location.href = "${returnUrl}";
               this.paymentResultDialog.show = true;
