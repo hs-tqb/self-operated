@@ -442,7 +442,7 @@ export default {
   async asyncData(ctx) {
     // let conf = await axios.post('getConfig');
     let config = {
-      orderTimeLimitMax:27,
+      orderTimeLimitMax:26,
       orderTimeLimitMin:5,
       orderDaysLimitMin:3
     };
@@ -720,8 +720,10 @@ export default {
     },
     scrollToAnchor (s, i) {
       this.stopScrollEvent = true;
+
       this.stopScrollIndex = i;
       this.$refs.fixedAnchor.textContent = s.letter;
+
       this.$refs['letter-'+s.letter][0].scrollIntoView()
       // this.stopScrollEvent = false;
     },
@@ -907,7 +909,8 @@ export default {
         } else {
           o.value += 1;
         }
-      }, 1000/Math.abs(val-o.value));
+      // }, 1000/Math.abs(val-o.value));
+      }, 30 );
     }
   },
   created () {
