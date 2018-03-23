@@ -119,7 +119,7 @@
     h5 { margin-bottom:15px; font-size:12px; }
     h4 { margin-bottom:15px; font-size:14px; }
     .panel { 
-      margin:15px 20px 0 20px; padding:15px; 
+      position:relative; z-index:10; margin:15px 20px 0 20px; padding:15px; 
       &.card { 
         background-color:@bgc; border-radius:7px; 
         box-shadow:0 0 25px 1px #ddd;
@@ -132,6 +132,19 @@
     .text-left   { text-align:left; }
     .color-primary { color:@color-primary; }
     .color-danger { color:@color-danger; }
+    #bg-lay {
+      position:absolute; top:0; left:0; z-index:0; 
+      width:100%; height:100%;
+      // background:rgba(0,0,0,0.4);
+      pointer-events:none;
+      div { 
+        position:absolute; top:0; left:0; 
+        width:100%; height:100%;
+        background:no-repeat; background-size:100% auto;
+        opacity:0; transition-duration:500ms; 
+        &.show { opacity:1; }
+      }
+    }
     #options {
       margin-top:0; 
       padding:25px 0 0 0;
@@ -222,10 +235,21 @@
   }
 </style>
 <template>
-  <div id="page-home" @click="" v-if="ready" :style="`background-image:url(${computedBg})`">
+  <div id="page-home" @click="" v-if="ready">
     <!-- <div id="gift">
       <a class="icon" href="javascript:void(0)"></a>
     </div> -->
+    <div id="bg-lay">
+      <div 
+        :class="contractInfo.threshold>15?'show':''" 
+        :style="`background-image:url(${bgs[2]});`"></div>
+      <div 
+        :class="contractInfo.threshold>5&&contractInfo.threshold<=15?'show':''" 
+        :style="`background-image:url(${bgs[1]});`"></div>
+      <div 
+        :class="contractInfo.threshold<=5?'show':''" 
+        :style="`background-image:url(${bgs[0]});`"></div>
+    </div>
     <div id="options" class="panel">
       <a href="javascript:void(0)" class="large" @click="showCityList">{{orderInfo.city.name}}</a>
       <h5>保障时间</h5>
@@ -472,6 +496,7 @@ export default {
   },
   data () {
     return {
+      bgs      :[bg1,bg2,bg3],
       ready    :true,
       cities   :[],
       allCities:[],
@@ -543,17 +568,12 @@ export default {
         timer  : {},
         payout : { name:'payout', value:0 },
         payment: { name:'payment', value:0 },
-        threshold: { name:'thresold', value:0},
+        threshold: { name:'threshold', value:0},
       },
       mounted: false
     }
   },
   computed: {
-    computedBg() {
-      let threshold = this.contractInfo.threshold;
-      return threshold>15? bg3:
-              (threshold>5? bg2: bg1 );
-    },
     computedMobile() {
       return this.orderInfo.mobile || this.userInfo.mobile;
     },
