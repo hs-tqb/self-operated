@@ -516,7 +516,7 @@ export default {
         orderId:' ',
       },
       contractInfo: {
-        payout:0,
+        payoutFee:0,
         price:0,
         threshold:0
       },
@@ -580,9 +580,6 @@ export default {
     // 城市
     searchedCities() {
       let cs = this.allCities;
-      console.log('--------------');
-      console.log(cs);
-      console.log('--------------');
       let kw = this.citySelectorDialog.keyword;
       return kw? cs.filter(c=>c.searchKey.indexOf(kw) >= 0): cs;
     },
@@ -639,7 +636,6 @@ export default {
       } else {
         return;
       }
-      
       this.animateNumber('payout', this.contractInfo.payoutFee * this.orderInfo.quantity / 100);
     },
     sendSMSVFCode() {
