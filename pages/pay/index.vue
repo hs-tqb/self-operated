@@ -610,8 +610,13 @@ export default {
         })( (this.computedAmount * 100 - this.coupon.value * 100)/100 )
     },
     orderable() {
-      return this.userInfo.mobile? true: 
-        /^1\d{10}$/.test(this.orderInfo.mobile) && this.orderInfo.vfCode && this.orderInfo.innerOrderId;
+      // 合约 + （已绑手机号 || 未绑手机号+验证码）
+      return this.contractInfo.innerOrderId? 
+        (
+          this.userInfo.mobile? true: 
+          /^1\d{10}$/.test(this.orderInfo.mobile) && this.orderInfo.vfCode
+        ): 
+        false;
     },
   },
   methods: {
