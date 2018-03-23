@@ -288,7 +288,7 @@
               >
             </div>
           </div>
-          <p>手机号炎症或将会绑定您的微信号，下次购买无须验证</p>
+          <p>手机号验证将会绑定您的微信号，下次购买无须验证</p>
         </template>
       </div>
     </div>
@@ -432,7 +432,7 @@
               <li><label>支付总价</label>{{computedPayFee}} 元</li>
             </ul>
             <div class="btn-wrapper">
-              <input type="button" class="button primary block" value="返回" @click="paymentResultDialog.show=false">
+              <input type="button" class="button primary block" value="返回" @click="(paymentResultDialog.show=false)||(orderInfo.outTradeNo='')">
             </div>
           </div>
         </div>
@@ -897,7 +897,6 @@ export default {
             console.log(vm);
             if(res.err_msg === "get_brand_wcpay_request:ok" ) {
               vm.paymentResultDialog.show = true;
-              vm.orderInfo.outTradeNo = '';
             }     
             // 使用以上方式判断前端返回, 微信团队郑重提示：res.err_msg将在用户支付成功后返回    ok，但并不保证它绝对可靠。 
           }
