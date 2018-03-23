@@ -175,6 +175,7 @@
       .input {
         .relative; .flow(column); margin-top:20px;
         input[type=text] { width:100%; .commonInput(); }
+        input:disabled { color:#999; }
         // .button { position:absolute; right:0; top:0; height:40px; }
         .group { 
           .flow(); margin-top:10px; width:100%;
@@ -184,7 +185,7 @@
           // input[type=text] { display:block; .flex(1); }
           .button { .commonInput(); padding:0; }
         }
-        .group + p { margin-top:7px; width:100%; font-size:12px; text-align:center; color:@color-info; } 
+        p { margin-top:7px; width:100%; font-size:12px; line-height:1.4; text-align:center; color:@color-info; } 
       }
       .number-wrapper {
         // .flow;
@@ -222,10 +223,9 @@
 </style>
 <template>
   <div id="page-home" @click="" v-if="ready" :style="`background-image:url(${computedBg})`">
-    <div id="gift">
+    <!-- <div id="gift">
       <a class="icon" href="javascript:void(0)"></a>
-      <!-- <img src="~/assets/img/icons/gift.png" alt=""> -->
-    </div>
+    </div> -->
     <div id="options" class="panel">
       <a href="javascript:void(0)" class="large" @click="showCityList">{{orderInfo.city.name}}</a>
       <h5>保障时间</h5>
@@ -269,9 +269,12 @@
       </ul>
       <div class="input">
         <h4>购买信息</h4>
-        <input v-if="!!userInfo.mobile" type="text" disabled :value="userInfo.mobile" />
-        <input v-else type="text" placeholder="您的手机号" v-model.trim="orderInfo.mobile" />
-        <template v-if="!userInfo.mobile">
+        <template v-if="!!userInfo.mobile">
+          <input type="text" disabled :value="userInfo.mobile" />
+          <p>如果这不是您的手机号，请在天气宝公众号留言联系客服</p>
+        </template>
+        <template v-else>
+          <input type="text" placeholder="您的手机号" v-model.trim="orderInfo.mobile" />
           <div class="group">
             <div class="inner-wrapper iw1">
               <input type="text" placeholder="获取验证码" v-model.trim="orderInfo.vfCode" />
