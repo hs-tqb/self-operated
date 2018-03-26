@@ -48,13 +48,14 @@
 
     /*  小贴士  */
     /* .cal-month:last-child { padding-bottom:60px; } */
-    #tips { position:relative; z-index:10; line-height:40px; background:#fff; border-top:2px solid #eee; }
+    #tips { position:relative; z-index:10; line-height:20px; font-size:12px; background:#fff; border-top:1px solid #eee; }
     .btn-wrapper { 
       line-height:40px; .bgc(#fff); 
       // .button { .radius(10px); }
+      .button:disabled { background-color:@color-border-base; }
     }
 
-    #content { height:calc(100vh - 100px); .scroll; }
+    #content { height:calc(100vh - 120px); .scroll; }
   }
 </style>
 
@@ -96,14 +97,19 @@
         </div>
       </div>
     </div>
-    <div class="btn-wrapper">
-      <input type="button" class="button block primary" value="确定" @click="confirmSelection">
+    <div id="tips" class="text-center text-danger">
+      <span v-if="showTips==='discontinuity'">出行计划必须日期连续哦</span>
+      <span v-else-if="showTips==='empty'">出行计划至少 1 天</span>
+      <template v-else-if="showTips==='valid'">
+        <span v-if="orderDateCount===1">{{orderDateStart}}，共1天行程</span>
+        <span v-else>
+          {{orderDateStart}} 至 {{orderDateEnd}}, 共{{orderDateCount}}天行程
+        </span>
+      </template>
     </div>
-    <!-- <div id="tips" class="text-center text-danger">
-      <span v-if="showTips==='discontinuity'">旅游计划必须日期连续哦</span>
-      <span v-else-if="showTips==='default'">旅游计划至少 3 天</span>
-      <span v-else="showTips==='valid'">{{orderDateStart}} 至 {{orderDateEnd}}, 共{{orderDateCount}}天行程</span>
-    </div> -->
+    <div class="btn-wrapper">
+      <input type="button" class="button block primary" :disabled="!orderable" value="确定" @click="confirmSelection">
+    </div>
   </div>
 </template>
 
@@ -115,12 +121,12 @@ export default {
       today      : null,
       monthList  : [],
 
-      showTips  : 'default',                // 下单操作的小贴士, 值为: default/discontinuity/valid, 对应 默认/选择不连续/有效 状态的不同文案提示
-      orderable : false,                    // 是否可下单
+      showTips  : 'valid',                // 下单操作的小贴士, 值为: default/discontinuity/valid, 对应 默认/选择不连续/有效 状态的不同文案提示
+      orderable : true,                    // 是否可下单
 
       orderDateStart:'',
       orderDateEnd  :'',
-      orderDateCount:0,
+      orderDateCount:1,
       orderCityCount:0,
 
       hasReadGuide:true,
@@ -339,26 +345,43 @@ export default {
           dayIdxs = JSON.parse(target.getAttribute('data-idxs')),
           dayObj  = this.getDayObject(dayIdxs);
 
-      dayObj.selected = true;
+      dayObj.selected = !dayObj.selected;
 
       this.selectedDay = dayObj;
       this.selectedDayIdxs = dayIdxs;
+      this.refreshMonthList(dayIdxs, dayObj);
 
-      if ( this.selections.length === 1 ) {
-        this.selections.push( dayObj );
-        this.refreshMonthList(dayIdxs, dayObj);
-      } else if ( this.selections.length > 1 ) {
-        this.selections.forEach( s=>{
-          s.selected = false;
-        });
-        dayObj.selected = true;
-        this.refreshMonthList(dayIdxs, dayObj);
-        this.selections = [dayObj];
+      this.selections = this.getSelections();
+
+      if ( this.selections.length === 0 ) {
+        this.showTips = 'empty';
+        this.orderable = false;
+      } else {
+        if ( this.checkOrderable() ) {
+          this.orderDateStart = this.getShortDate(this.selections[0]);
+          this.orderDateEnd   = this.getShortDate(this.selections[this.selections.length-1]);
+          this.orderDateCount = this.selections.length;
+          this.showTips       = 'valid';
+          this.orderable      = true;
+        } else if (this.selections.length) {
+          this.showTips = 'discontinuity';
+          this.orderable = false;
+        }
       }
-      this.makeContinuity();
-      // if ( this.checkOrderable2() ) {
-      //   this.$emit('dateChange', this.selections[0], this.selections[this.selections.length-1]);
-      // }
+
+    },
+    getSelections() {
+      let selections = [];
+      this.monthList.forEach(month=>{
+        month.data.forEach(week=>{
+          week.forEach(day=>{
+            if (day.selected === true) {
+              selections.push(day);
+            }
+          })
+        })
+      });
+      return selections;
     },
     makeContinuity() {
       // console.log( this.selections );
@@ -408,6 +431,25 @@ export default {
       this.selections.sort((c,n)=>(c.year*1000+c.month*100+c.day)-(n.year*1000+n.month*100+n.day));
       this.$emit('dateChange', this.selections[0], this.selections[this.selections.length-1]);
     },
+    checkOrderable() {
+      // 对比毫秒数
+      let selections = this.selections
+      let dayMS   = 24 * 60 * 60 * 1000;
+      let currDay = 0;
+      let prevDay = (function(day) {
+        return + new Date(day.year, day.month, day.day);
+      } (selections[0]));
+      if ( selections.every((day,i)=>{
+        if ( i===0 ) return true;
+        currDay = +new Date(day.year, day.month, day.day);
+        if (currDay-prevDay === dayMS) {
+          prevDay = currDay;
+          return true;
+        }
+      }) ) {
+        return true;
+      }
+    },
     checkOrderable2() {
       let selections = this.selections,
           result     = false;
@@ -431,7 +473,7 @@ export default {
       return result;
     },
     getShortDate(d) {
-      return (d.month>9?d.month:'0'+d.month) + '-' + 
+      return (d.month+1>9?d.month+1:'0'+(d.month+1)) + '-' + 
         (d.day>9?d.day:'0'+d.day)
     },
     // 检测订单的有效性
@@ -498,7 +540,10 @@ export default {
         }
       })
     })
-    this.selections = selections;
+    this.orderDateStart = this.getShortDate(selections[0]);
+    this.orderDateEnd   = this.getShortDate(selections[selections.length-1]);
+    this.orderDateCount = selections.length;
+    this.selections     = selections;
 
     
     // 因为用flex布局, 给月份内部再加一个周分组会更好处理
@@ -508,8 +553,8 @@ export default {
     
     // 检查是否可以下单
     // this.checkOrderable('fromCache', monthList);
-    this.makeContinuity();
-    this.checkOrderable2();
+    // this.makeContinuity();
+    // this.checkOrderable2();
   }
 }
 </script>

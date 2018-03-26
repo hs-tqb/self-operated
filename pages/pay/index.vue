@@ -542,7 +542,7 @@ export default {
       },
       calendarDialog: {
         show:false,
-        // show:true,
+        show:true,
         config: {
           orderTimeLimitMin:10, 
           orderTimeLimitMax:60, 
@@ -745,7 +745,11 @@ export default {
     searchCity(e) {
       clearTimeout(this.citySelectorDialog.timer);
       this.citySelectorDialog.timer = setTimeout(()=>{
-        this.citySelectorDialog.keyword = e.target.value.trim();
+        if( !(this.citySelectorDialog.keyword = e.target.value.trim()) ) {
+          this.$nextTick(()=>{
+            this.initCityListScroll()
+          });
+        }
       }, 300);
     },
     scrollToAnchor (s, i) {
@@ -945,9 +949,6 @@ export default {
     }
   },
   created () {
-    // this.loadCityData();
-    // this.getContract();
-
     let config  = this.config;
     let dateFrom = new Date(),
         dateTo   = new Date();
