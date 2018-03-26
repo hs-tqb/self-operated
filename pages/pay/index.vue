@@ -828,7 +828,6 @@ export default {
         this.cities    = allCities;
         this.hotCities = hotCities;
 
-        console.log(  )
 
         this.$nextTick(()=>{
           this.initCityListScroll()
@@ -944,7 +943,6 @@ export default {
           'getBrandWCPayRequest', 
           option,
           function(res){
-            console.log(vm);
             if(res.err_msg === "get_brand_wcpay_request:ok" ) {
               vm.paymentResultDialog.show = true;
             }     
@@ -991,7 +989,6 @@ export default {
     this.orderInfo.date.from = dateFrom;
     this.orderInfo.date.to   = dateTo;
 
-    console.log( this.orderInfo.date );
 
     this.calendarDialog.config = {
       ...this.calendarDialog.config,

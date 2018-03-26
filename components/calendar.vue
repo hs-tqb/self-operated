@@ -98,8 +98,8 @@
       </div>
     </div>
     <div id="tips" class="text-center text-danger">
-      <span v-if="showTips==='discontinuity'">出行计划必须日期连续哦</span>
-      <span v-else-if="showTips==='empty'">出行计划至少 1 天</span>
+      <span v-if="showTips==='discontinuity'">保障计划必须日期连续哦</span>
+      <span v-else-if="showTips==='empty'">保障计划至少 1 天</span>
       <template v-else-if="showTips==='valid'">
         <span v-if="orderDateCount===1">{{orderDateStart}}，共1天行程</span>
         <span v-else>
