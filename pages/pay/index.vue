@@ -717,9 +717,24 @@ export default {
       }, coupon.delay)
     },
     dateChange(from, to) {
+      // console.log( this.orderInfo.date );
+      // console.log( new Date(from.year, from.month, from.day),  new Date(to.year, to.month, to.day));
+      // return;
+      this.calendarDialog.show = false;
+      
+      // 日期不改则不做请求
+      let currFrom = this.orderInfo.date.from;
+      let currTo   = this.orderInfo.date.to;
+      if ( 
+        (currFrom.getFullYear()===from.year&&currFrom.getMonth()===from.month&&currFrom.getDate()===from.day)&&
+        (currTo.getFullYear()===to.year&&currTo.getMonth()===to.month&&currTo.getDate()===to.day)
+      ) {
+        return;
+      }
+
       this.orderInfo.date.from = new Date(from.year, from.month, from.day);
       this.orderInfo.date.to   = new Date(to.year, to.month, to.day);
-      this.calendarDialog.show = false;
+      // this.calendarDialog.show = false;
       this.orderInfo.innerOrderId = '';
       this.orderInfo.outTradeNo   = '';
       this.getContract();
