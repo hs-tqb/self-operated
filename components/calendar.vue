@@ -296,10 +296,9 @@ export default {
           tDay   = today.getDate();
 
       if ( type === 'normal' ) {
-        // 对3日内做处理 ( 未来3日内不能选定 )
         let temp = +new Date(year, month, day);
         if ( 
-          temp < (+today) + this.config.orderTimeLimitMin * 86400000   
+          temp < (+today) + (this.config.orderTimeLimitMin-1) * 86400000   
           || temp >= (+today) + this.config.orderTimeLimitMax * 86400000
         ) {
           type = "limit";
@@ -502,7 +501,7 @@ export default {
     // 获取已选城市数据
     getSelectedDaysStorage() {
       let todayMs     = +this.today;
-      let intervalMin = this.config.orderTimeLimitMin * 86400000;
+      let intervalMin = (this.config.orderTimeLimitMin-1) * 86400000;
       // let intervalMax = this.config.orderTimeLimitMax;
       let temp = null;
       // 过滤掉老的缓存, 老的缓存不涉及未来, 所以不做最大的对比
@@ -528,6 +527,8 @@ export default {
     let d1 = this.initDayObject(dateFrom.getFullYear(), dateFrom.getMonth(), dateFrom.getDate(), 'normal');
     let d2 = this.initDayObject(dateTo.getFullYear(), dateTo.getMonth(), dateTo.getDate(), 'normal');
     let selections = [];
+
+
     monthList.forEach(m=>{
       if ( 
         (m.date.year!==d1.year||m.date.month!==d1.month) && 
@@ -540,6 +541,7 @@ export default {
         }
       })
     })
+    
     this.orderDateStart = this.getShortDate(selections[0]);
     this.orderDateEnd   = this.getShortDate(selections[selections.length-1]);
     this.orderDateCount = selections.length;

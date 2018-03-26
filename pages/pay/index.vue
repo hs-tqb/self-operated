@@ -277,7 +277,7 @@
           <p class="text-left"><span class="large color-primary">{{animation.payout.value}}</span> 元</p>
         </li>
       </ul>
-      <p class="explain">如果{{orderInfo.city.name}}保障日期内，任意当日累计降水量大于 {{contractInfo.threshold}} mm，则赔付现金红包 {{computedPayout}} 元。降水量以为{{orderInfo.city.name}}气象站为主（{{orderInfo.city.id.replace(/cn/gi,'')}}）测量数据为准</p>
+      <p class="explain">如果{{orderInfo.city.name}}保障日期内，任意当日累计降水量大于 {{contractInfo.threshold}} mm，则赔付现金红包 {{computedPayout}} 元。降水量以{{orderInfo.city.name}}气象站（{{orderInfo.city.id.replace(/cn/gi,'')}}）测量数据为准</p>
     </div>
     <div id="cart" class="panel card">
       <ul>
@@ -458,7 +458,14 @@
             <ul v-if="orderInfo.outTradeNo">
               <li><label>订单号</label>{{orderInfo.outTradeNo}}</li>
               <li><label>保障城市</label>{{orderInfo.city.name}}</li>
-              <li><label>保障时间</label>{{formatDateString(orderInfo.date.from)}} 至 {{formatDateString(orderInfo.date.to)}}</li>
+              <li><label>保障时间</label>
+                <template v-if="formatDateString(orderInfo.date.from)===formatDateString(orderInfo.date.to)">
+                  {{formatDateString(orderInfo.date.from)}}
+                </template>
+                <template v-else>
+                  {{formatDateString(orderInfo.date.from)}} 至 {{formatDateString(orderInfo.date.to)}}
+                </template>
+              </li>
               <li><label>保障条件</label>任意单日降水量 > {{contractInfo.threshold}}mm</li>
               <li><label>保障金额</label>{{computedPayout}}元</li>
               <li><label>单价</label>{{computedPrice}} 元</li>
@@ -487,11 +494,11 @@ import bg3 from '~/assets/img/banner/bg3.jpg'
 export default {
   async asyncData(ctx) {
     // let conf = await axios.post('getConfig');
-    let config = {
-      orderTimeLimitMax:26,
-      orderTimeLimitMin:5,
-      orderDaysLimitMin:1
-    };
+    // let config = {
+    //   orderTimeLimitMax:30,
+    //   orderTimeLimitMin:1,
+    //   orderDaysLimitMin:1
+    // };
 
     let openid = ctx.query.openid  || 'opb1Ft61n4QEwe29QyorjApHAnO8';
     let mobile;
@@ -503,7 +510,7 @@ export default {
         })
     }
 
-    return { config, userInfo:{openid, mobile} };
+    return { userInfo:{openid, mobile} };
   },
   data () {
     return {
@@ -561,9 +568,9 @@ export default {
         show:false,
         // show:true,
         config: {
-          orderTimeLimitMin:10, 
-          orderTimeLimitMax:60, 
-          orderDaysLimitMin:3,
+          orderTimeLimitMax:30, 
+          orderTimeLimitMin:1, 
+          orderDaysLimitMin:1,
           monthOnShow:3,
           dateFrom:new Date(),
           dateTo:new Date()
@@ -994,25 +1001,29 @@ export default {
     }
   },
   created () {
-    let config  = this.config;
+    let config  = this.calendarDialog.config;
     let dateFrom = new Date(),
         dateTo   = new Date();
-    dateFrom.setDate(dateFrom.getDate() + config.orderTimeLimitMin + 1);
-    dateTo.setDate(dateTo.getDate() + config.orderTimeLimitMin +  config.orderDaysLimitMin);
+    dateFrom.setDate(dateFrom.getDate() + config.orderTimeLimitMin );
+    dateTo.setDate(dateTo.getDate() + config.orderTimeLimitMin +  config.orderDaysLimitMin -1);
+
 
 
     this.orderInfo.date.from = dateFrom;
     this.orderInfo.date.to   = dateTo;
 
+    config.dateFrom = dateFrom;
+    config.dateTo   = dateTo;
 
-    this.calendarDialog.config = {
-      ...this.calendarDialog.config,
-      orderTimeLimitMax:config.orderTimeLimitMax,
-      orderTimeLimitMin:config.orderTimeLimitMin,
-      orderDaysLimitMin:config.orderDaysLimitMin,
-      dateFrom,
-      dateTo
-    };
+
+    // this.calendarDialog.config = {
+      // ...this.calendarDialog.config,
+      // orderTimeLimitMax:config.orderTimeLimitMax,
+      // orderTimeLimitMin:config.orderTimeLimitMin,
+      // orderDaysLimitMin:config.orderDaysLimitMin,
+    //   dateFrom,
+    //   dateTo
+    // };
   },
   mounted() {
     this.mounted = true;
