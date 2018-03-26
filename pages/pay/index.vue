@@ -972,8 +972,8 @@ export default {
   },
   mounted() {
     this.mounted = true;
-    // this.loadCityData();
-    // this.getContract();
+    this.loadCityData();
+    this.getContract();
 
     if ( this.userInfo.openid ) {
       axios.post('getMobile', {openId:this.userInfo.openid})
