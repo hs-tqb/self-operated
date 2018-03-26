@@ -485,8 +485,16 @@ export default {
     };
 
     let openid = ctx.query.openid  || 'opb1Ft61n4QEwe29QyorjApHAnO8';
+    let mobile;
+     if ( openid ) {
+      await axios.post('getMobile', {openId:openid})
+        .then(resp=>{
+          if (resp.state !== 1) return;
+          mobile = resp.data.mobile;
+        })
+    }
 
-    return { config, userInfo:{openid} };
+    return { config, userInfo:{openid, mobile} };
   },
   data () {
     return {
@@ -975,13 +983,6 @@ export default {
     this.loadCityData();
     this.getContract();
 
-    if ( this.userInfo.openid ) {
-      axios.post('getMobile', {openId:this.userInfo.openid})
-        .then(resp=>{
-          if (resp.state !== 1) return;
-          this.userInfo.mobile = resp.data;
-        })
-    }
     if ( process.env.RUN_ENV==='development' ) {
       eruda.init();
     }
