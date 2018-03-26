@@ -8,7 +8,7 @@
     &.show { pointer-events:auto; opacity:1; }
   }
   #dialog-message {
-    .flow; .align(c); .justify(c);
+    .flow; .align(center); .justify(c);
     background-color:transparent;
     &.show{ pointer-events:none; }
     .inner-wrapper { 

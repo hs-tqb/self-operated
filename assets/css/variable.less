@@ -35,10 +35,12 @@
 .justify(sb) { justify-content:space-between; }
 .justify(sa) { justify-content:space-around; }
 
-// .align(s)  { align-items:stretch; }
-// .align(c)  { align-items:center; }
-// .align(fs) { align-items:flex-start; }
-// .align(fe) { align-items:flex-end; }
+.justify(@p:center) { justify-content:@p; }
+
+.align(s)  { align-items:stretch; }
+.align(c)  { align-items:center; }
+.align(fs) { align-items:flex-start; }
+.align(fe) { align-items:flex-end; }
 .align(@p:center) { align-items:@p; }
 
 
