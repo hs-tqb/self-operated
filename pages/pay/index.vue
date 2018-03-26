@@ -27,7 +27,8 @@
     }
     h3 { padding:0 @gap-n; line-height:26px; background-color:@color-border-lighter; }
     #city-search-box {
-      padding:10px 15px; 
+      .flow(); .align(stretch); padding:10px 20px 10px 0;
+      a { width:60px; line-height:30px; text-align:center; font-size:20px; font-weight:bold; }
       input { width:100%; .commonInput(); height:30px; }
     }
     #hot-cities {
@@ -217,7 +218,7 @@
     }
     padding-bottom:75px;
     #btn-wrapper {
-      position:fixed; bottom:15px; left:0; 
+      position:fixed; bottom:15px; left:0; z-index:10;
       padding:0 20px;
       width:100%;
       .button {
@@ -347,6 +348,7 @@
     <div id="dialog-cities" class="dialog-container" :class="citySelectorDialog.show?'show':''">
       <div class="outer-wrapper">
         <div id="city-search-box">
+          <a href="javascript:void(0)" @click="citySelectorDialog.show=false">&lt;</a>
           <input type="text" :value="citySelectorDialog.keyword" @input="searchCity">
         </div>
         <!-- 搜索 -->
@@ -417,7 +419,7 @@
           <li><label>保障时间</label>{{formatDateString(orderInfo.date.from)}} 至 {{formatDateString(orderInfo.date.to)}}</li>
           <li><label>保障条件</label>任意单日降水量 > {{contractInfo.threshold}}mm</li>
           <li><label>保障金额</label>{{computedPayout}}元</li>
-          <li><label>手机号</label>{{userInfo.mobile || orderInfo.mobile}}</li>
+          <li><label>手机号</label>{{userInfo.mobile}}元</li>
           <li><label>单价</label>{{computedPrice}} 元</li>
           <li><label>份数</label>{{orderInfo.quantity}}</li>
           <!-- <li><label>优惠金额</label>{{coupon.collapsed?0:(coupon.value||0)}} 元</li> -->
@@ -479,20 +481,12 @@ export default {
     let config = {
       orderTimeLimitMax:26,
       orderTimeLimitMin:5,
-      orderDaysLimitMin:3
+      orderDaysLimitMin:1
     };
 
     let openid = ctx.query.openid  || 'opb1Ft61n4QEwe29QyorjApHAnO8';
-    let mobile;
 
-    if ( openid ) {
-
-      mobile = (await axios.post('getMobile', {openId:openid})).data;
-      mobile = mobile? mobile.mobile: undefined;
-
-    }
-
-    return { config, userInfo:{openid, mobile} };
+    return { config, userInfo:{openid} };
   },
   data () {
     return {
@@ -501,7 +495,6 @@ export default {
       cities   :[],
       allCities:[],
       hotCities:[],
-      userInfo : {},
       orderInfo: {
         city: {
           name:'北京',
@@ -542,12 +535,14 @@ export default {
       // 选择器
       citySelectorDialog: {
         show:false,
+        // show:true,
         searching:false,
         keyword:'',
         timer  :-1,
       },
       calendarDialog: {
         show:false,
+        // show:true,
         config: {
           orderTimeLimitMin:10, 
           orderTimeLimitMax:60, 
@@ -611,12 +606,10 @@ export default {
     },
     orderable() {
       // 合约 + （已绑手机号 || 未绑手机号+验证码）
-      return this.contractInfo.innerOrderId? 
-        (
-          this.userInfo.mobile? true: 
-          /^1\d{10}$/.test(this.orderInfo.mobile) && this.orderInfo.vfCode
-        ): 
-        false;
+      return ( this.contractInfo.innerOrderId ) &&
+          ( this.userInfo.mobile || 
+            ( /^1\d{10}$/.test(this.orderInfo.mobile) && this.orderInfo.vfCode )
+          )
     },
   },
   methods: {
@@ -979,15 +972,16 @@ export default {
     this.loadCityData();
     this.getContract();
 
-    // this.$http.get('getOpenId')
-    //   .then(resp=>{
-    //     if ( resp.state === 1 ) {
-    //       this.openId = resp.data;
-    //     }
-    //   })
-    //   .catch(err=>{
-    //     console.err(err);
-    //   })
+    if ( this.userInfo.openid ) {
+      axios.post('getMobile', {openId:this.userInfo.openid})
+        .then(resp=>{
+          if (resp.state !== 1) return;
+          this.userInfo.mobile = resp.data;
+        })
+    }
+    if ( process.env.RUN_ENV==='development' ) {
+      eruda.init();
+    }
   },
   components: {
     calendarViewer

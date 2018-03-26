@@ -35,10 +35,11 @@
 .justify(sb) { justify-content:space-between; }
 .justify(sa) { justify-content:space-around; }
 
-.align(s)  { align-items:stretch; }
-.align(c)  { align-items:center; }
-.align(fs) { align-items:flex-start; }
-.align(fe) { align-items:flex-end; }
+// .align(s)  { align-items:stretch; }
+// .align(c)  { align-items:center; }
+// .align(fs) { align-items:flex-start; }
+// .align(fe) { align-items:flex-end; }
+.align(@p:center) { align-items:@p; }
 
 
 .scroll() {
@@ -61,7 +62,9 @@
 .border(right;@w:1px;@s:solid;@c:@color-border-base) {
   border-right:@w @s @c;
 }
-
+.radius(@w:3px) {
+  border-radius:@w
+}
 
 .relative() { position:relative; }
 

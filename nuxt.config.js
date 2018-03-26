@@ -17,7 +17,7 @@ module.exports = {
     script: [
       { src:'http://res.wx.qq.com/open/js/jweixin-1.2.0.js' },
       { src:'//cdn.bootcss.com/eruda/1.4.2/eruda.min.js' },
-      { src:'/js/wxconfig.js' }
+      // { src:'/js/wxconfig.js' }
     ],
   },
   /*

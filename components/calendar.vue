@@ -49,6 +49,10 @@
     /*  小贴士  */
     /* .cal-month:last-child { padding-bottom:60px; } */
     #tips { position:relative; z-index:10; line-height:40px; background:#fff; border-top:2px solid #eee; }
+    .btn-wrapper { 
+      line-height:40px; .bgc(#fff); 
+      // .button { .radius(10px); }
+    }
 
     #content { height:calc(100vh - 100px); .scroll; }
   }
@@ -92,11 +96,14 @@
         </div>
       </div>
     </div>
-    <div id="tips" class="text-center text-danger">
+    <div class="btn-wrapper">
+      <input type="button" class="button block primary" value="确定" @click="confirmSelection">
+    </div>
+    <!-- <div id="tips" class="text-center text-danger">
       <span v-if="showTips==='discontinuity'">旅游计划必须日期连续哦</span>
       <span v-else-if="showTips==='default'">旅游计划至少 3 天</span>
       <span v-else="showTips==='valid'">{{orderDateStart}} 至 {{orderDateEnd}}, 共{{orderDateCount}}天行程</span>
-    </div>
+    </div> -->
   </div>
 </template>
 
@@ -349,10 +356,9 @@ export default {
         this.selections = [dayObj];
       }
       this.makeContinuity();
-      if ( this.checkOrderable2() ) {
-        // this.config.dialog.show = false;
-        this.$emit('dateChange', this.selections[0], this.selections[this.selections.length-1]);
-      }
+      // if ( this.checkOrderable2() ) {
+      //   this.$emit('dateChange', this.selections[0], this.selections[this.selections.length-1]);
+      // }
     },
     makeContinuity() {
       // console.log( this.selections );
@@ -397,6 +403,10 @@ export default {
       this.setSelectedDaysStorage( this.selections )
 
       return data;
+    },
+    confirmSelection() {
+      this.selections.sort((c,n)=>(c.year*1000+c.month*100+c.day)-(n.year*1000+n.month*100+n.day));
+      this.$emit('dateChange', this.selections[0], this.selections[this.selections.length-1]);
     },
     checkOrderable2() {
       let selections = this.selections,
