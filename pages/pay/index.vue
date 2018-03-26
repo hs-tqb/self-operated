@@ -728,7 +728,11 @@ export default {
       this.$http.post('getContract', {
         cityId:this.orderInfo.city.id,
         startTime:this.parseDateForParam(this.orderInfo.date.from),
-        endTime:this.parseDateForParam(this.orderInfo.date.to),
+        endTime:this.parseDateForParam(function(d) {
+          d = new Date(+d);
+          d.setDate(d.getDate()+1);
+          return d;
+        } (this.orderInfo.date.to)),
         openId:this.userInfo.openid
       })
       .then(resp=>{
@@ -979,6 +983,8 @@ export default {
 
     this.orderInfo.date.from = dateFrom;
     this.orderInfo.date.to   = dateTo;
+
+    console.log( this.orderInfo.date );
 
     this.calendarDialog.config = {
       ...this.calendarDialog.config,
