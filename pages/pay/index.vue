@@ -542,7 +542,7 @@ export default {
       },
       calendarDialog: {
         show:false,
-        show:true,
+        // show:true,
         config: {
           orderTimeLimitMin:10, 
           orderTimeLimitMax:60, 
@@ -725,6 +725,8 @@ export default {
         if ( resp.state !== 1 ) return;
         //  this.$store.commit('showMessageDialog', {type:'failure', text:resp.message})
         this.contractInfo = resp.data;
+        // console.log(resp.data.payoutFee * this.orderInfo.quantity / 100)
+        
         this.animateNumber('payout', resp.data.payoutFee * this.orderInfo.quantity / 100);
         this.animateNumber('threshold', resp.data.threshold);
       })
