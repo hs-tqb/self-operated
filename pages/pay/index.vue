@@ -418,7 +418,14 @@
         <h3>订单确认</h3>
         <ul>
           <li><label>保障城市</label>{{orderInfo.city.name}}</li>
-          <li><label>保障时间</label>{{formatDateString(orderInfo.date.from)}} 至 {{formatDateString(orderInfo.date.to)}}</li>
+          <li><label>保障时间</label>
+            <template v-if="formatDateString(orderInfo.date.from)===formatDateString(orderInfo.date.to)">
+              {{formatDateString(orderInfo.date.from)}}
+            </template>
+            <template v-else>
+              {{formatDateString(orderInfo.date.from)}} 至 {{formatDateString(orderInfo.date.to)}}
+            </template>
+          </li>
           <li><label>保障条件</label>任意单日降水量 > {{contractInfo.threshold}}mm</li>
           <li><label>保障金额</label>{{computedPayout}}元</li>
           <li><label>手机号</label>{{userInfo.mobile}}元</li>
