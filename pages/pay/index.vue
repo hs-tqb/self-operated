@@ -252,17 +252,19 @@
         :style="`background-image:url(${bgs[0]});`"></div>
     </div>
     <div id="options" class="panel">
-      <a href="javascript:void(0)" class="large" @click="showCityList">{{orderInfo.city.name}}</a>
+      <a href="javascript:void(0)" class="large" @click="showCityList">{{orderInfo.city.name}} > </a>
       <h5>保障时间</h5>
-      <a href="javascript:void(0)" @click="calendarDialog.show=true">
-        <span class="large">
+      <div class="large" @click="calendarDialog.show=true">
+        <a href="javascript:void(0)">
           {{computedDateFrom}}
-        </span> > 
-        <span class="large">
-          {{computedDateTo}}
-          <!-- <input type="date" v-model="orderInfo.date.to"> -->
-        </span>
-      </a>
+        </a> 
+        <template v-if="computedDateTo!==computedDateFrom">
+          <span> &gt; </span>
+          <a href="javascript:void(0)">
+            {{computedDateTo}}
+          </a>
+        </template>
+      </div>
     </div>
     <div id="payout" class="panel card">
       <ul id="condition">
