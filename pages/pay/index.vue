@@ -597,7 +597,7 @@ export default {
     },
     // 合约
     computedPayout() {
-      return this.contractInfo.payoutFee * this.orderInfo.quantity / 100;
+      return parseInt(this.contractInfo.payoutFee * this.orderInfo.quantity);
     },
     computedPrice() {
       return this.contractInfo.price/100;
