@@ -730,7 +730,16 @@ export default {
         openId:this.userInfo.openid
       })
       .then(resp=>{
-        if ( resp.state !== 1 ) return;
+        if ( resp.state !== 1 ) {
+          this.contractInfo = {
+            payoutFee:0,
+            price:0,
+            threshold:0
+          };
+          this.animation.payout.value    = 0;
+          this.animation.threshold.value = 0;
+          return;
+        }
         //  this.$store.commit('showMessageDialog', {type:'failure', text:resp.message})
         this.contractInfo = resp.data;
         // console.log(resp.data.payoutFee * this.orderInfo.quantity / 100)
