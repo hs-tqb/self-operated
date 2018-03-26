@@ -521,7 +521,8 @@ export default {
       hotCities:[],
       orderInfo: {
         city: {
-          name:'北京',
+          name:'定位中',
+          // id:''
           id:'CN54511'
         },
         date: {
@@ -815,8 +816,8 @@ export default {
       this.$refs['letter-'+s.letter][0].scrollIntoView()
       // this.stopScrollEvent = false;
     },
-    loadCityData() {
-      this.$http.post('getCities')
+    async loadCityData() {
+      await this.$http.post('getCities')
       .then(resp => {
         if ( resp.state !== 1 ) throw resp.message;
 
@@ -1025,10 +1026,32 @@ export default {
     //   dateTo
     // };
   },
-  mounted() {
+  async mounted() {
     this.mounted = true;
-    this.loadCityData();
-    this.getContract();
+    await this.loadCityData();
+
+    let script = document.createElement('script');
+    script.setAttribute('async', 'false');
+    document.body.appendChild(script);
+    script.src = 'http://int.dpool.sina.com.cn/iplookup/iplookup.php?format=js';
+    script.addEventListener('load', ()=>{
+      console.log( remote_ip_info.city );
+      let localCityName = remote_ip_info.city;
+      if ( !this.allCities.some(c=>{
+          if ( c.value===localCityName ) {
+            this.orderInfo.city = {name:localCityName, id  :c.id};
+            return true;
+          }
+      })) {
+        this.orderInfo.city = {
+          name:'北京',
+          id:'CN54511'
+        }
+      }
+      this.getContract();
+    });
+
+    // this.getContract();
 
     if ( process.env.RUN_ENV==='development' ) {
       eruda.init();
