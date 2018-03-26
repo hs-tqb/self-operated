@@ -642,7 +642,7 @@ export default {
       } else {
         return;
       }
-      this.animateNumber('payout', this.contractInfo.payoutFee * this.orderInfo.quantity / 100);
+      this.animateNumber('payout',  parseInt(this.contractInfo.payoutFee * this.orderInfo.quantity) );
     },
     sendSMSVFCode() {
       let mobile = this.orderInfo.mobile
@@ -735,7 +735,7 @@ export default {
         this.contractInfo = resp.data;
         // console.log(resp.data.payoutFee * this.orderInfo.quantity / 100)
         
-        this.animateNumber('payout', resp.data.payoutFee * this.orderInfo.quantity / 100);
+        this.animateNumber('payout', parseInt(resp.data.payoutFee * this.orderInfo.quantity));
         this.animateNumber('threshold', resp.data.threshold);
       })
     },
