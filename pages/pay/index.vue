@@ -503,11 +503,11 @@ export default {
     let openid = ctx.query.openid  || 'opb1Ft61n4QEwe29QyorjApHAnO8';
     let mobile;
      if ( openid ) {
-      await axios.post('getMobile', {openId:openid})
-        .then(resp=>{
-          if (resp.state !== 1) return;
-          mobile = resp.data.mobile;
-        })
+      // await axios.post('getMobile', {openId:openid})
+      //   .then(resp=>{
+      //     if (resp.state !== 1) return;
+      //     mobile = resp.data.mobile;
+      //   })
     }
 
     return { userInfo:{openid, mobile} };
@@ -1050,6 +1050,12 @@ export default {
       }
       this.getContract();
     });
+
+    this.$http.post('getMobile', {openId:this.userInfo.openid})
+        .then(resp=>{
+          if (resp.state !== 1) return;
+          this.userInfo.mobile = resp.data.mobile;
+        })
 
     // this.getContract();
 
