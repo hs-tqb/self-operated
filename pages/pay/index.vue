@@ -474,7 +474,8 @@
               <li><label>支付总价</label>{{computedPayFee}} 元</li>
             </ul>
             <div class="btn-wrapper">
-              <input type="button" class="button primary block" value="返回" @click="(paymentResultDialog.show=false)||(orderInfo.outTradeNo='')">
+              <!-- <input type="button" class="button primary block" value="返回" @click="(paymentResultDialog.show=false)||(orderInfo.outTradeNo='')"> -->
+              <input type="button" class="button primary block" value="返回" @click="location.reload()">
             </div>
           </div>
         </div>
@@ -945,8 +946,8 @@ export default {
     async wechatPay() {
       let option = (await this.$http.post('getPaymentOption', {
           outTradeNo: this.orderInfo.outTradeNo,
-          // totalFee  : this.orderInfo.totalFee,
-          totalFee  : 1,
+          totalFee  : this.orderInfo.totalFee,
+          // totalFee  : 1,
           body      : this.orderInfo.body,
           returnUrl : 'w.baotianqi.cn',
           openid    : this.userInfo.openid,
