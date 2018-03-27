@@ -1,6 +1,7 @@
 let config = {
   development: {
-    baseURL: 'http://test.selfrain.baotianqi.cn/'
+    // baseURL: 'http://test.selfrain.baotianqi.cn/'
+    baseURL: 'http://192.168.1.159:8008/'
   },
   test: {
     // baseURL: 'http://test.selfrain.baotianqi.cn/'
