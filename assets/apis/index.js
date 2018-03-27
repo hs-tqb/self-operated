@@ -2,7 +2,7 @@ module.exports = {
   getConfig: 'selfrain/init/',
   getCities: 'selfrain/getCitys/',
   getContract:'selfrain/getContract',
-  addOrder: 'selfrain/addOrder',
+  addOrder: 'http://192.168.1.159:8008/selfrain/addOrder',
   getMobile:'http://192.168.1.159:8008/selfrain/getUserMobile',
   getSMSVFCode: 'selfrain/getCode',
 
