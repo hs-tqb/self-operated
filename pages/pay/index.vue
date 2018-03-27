@@ -78,6 +78,7 @@
     img.border { display:block; width:100%; }
     .outer-wrapper { height:100%; padding:30px; }
     .inner-wrapper { 
+      .flow(column);
       .panel { margin:0; } .scroll;
       height:100%; 
       // max-height:100%;
@@ -86,6 +87,7 @@
       img + h3 { margin-top:10px; }
       .tips { margin-top:10px; padding-top:15px; font-size:12px; line-height:1.4; text-align:justify; .border(top); }
       .info {
+        .flex(1); display:flex; flex-direction:column; width:100%;
         h3 { 
           @c:#689eff;
           .flow; align-items:center;
@@ -104,8 +106,9 @@
           label { display:inline-block; margin-right:12px; width:100px; text-indent:20px; background-color:#f5f5f5; .border(right); }
         }
         .btn-wrapper {
-          margin:15px; margin-bottom:0;
-          .button { .radius(); }
+          .flex(1); display:flex; flex-direction:column; .align(center); .justify(center);
+          margin:15px; min-height:40px;
+          .button { .radius(); height:40px; }
         }
       }
     }
@@ -475,7 +478,7 @@
             </ul>
             <div class="btn-wrapper">
               <!-- <input type="button" class="button primary block" value="返回" @click="(paymentResultDialog.show=false)||(orderInfo.outTradeNo='')"> -->
-              <input type="button" class="button primary block" value="返回" @click="location.reload()">
+              <input type="button" class="button primary block" value="返回" @click="reload">
             </div>
           </div>
         </div>
@@ -657,9 +660,8 @@ export default {
         orderInfo.quantity-=1
       } else if ( u==='+' && orderInfo.quantity<2 ) {
         orderInfo.quantity+=1
-      } else {
-        return;
       }
+      this.orderInfo.outTradeNo = '';
       this.animateNumber('payout',  parseInt(this.contractInfo.payoutFee * this.orderInfo.quantity /100) );
     },
     sendSMSVFCode() {
@@ -1000,6 +1002,9 @@ export default {
         }
       // }, 1000/Math.abs(val-o.value));
       }, 30 );
+    },
+    reload() {
+      location.reload();
     }
   },
   created () {
@@ -1036,7 +1041,6 @@ export default {
     document.body.appendChild(script);
     script.src = 'http://int.dpool.sina.com.cn/iplookup/iplookup.php?format=js';
     script.addEventListener('load', ()=>{
-      console.log( remote_ip_info.city );
       let localCityName = remote_ip_info.city;
       if ( !this.allCities.some(c=>{
           if ( c.value===localCityName ) {
