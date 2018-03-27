@@ -665,7 +665,7 @@ export default {
       let mobile = this.orderInfo.mobile
       // 验证手机号
       if ( !/^1\d{10}$/.test(mobile) ) {
-        return this.$store.commit('showMessageDialog', {type:'failure', text:'手机号无效x',delay:400000000});
+        return this.$store.commit('showMessageDialog', {type:'failure', text:'无效的手机号',delay:400000000});
       }
       // 重新发送倒计时
       this.vfCode.disabled = true;
