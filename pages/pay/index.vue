@@ -188,7 +188,7 @@
       }
       .input {
         .relative; .flow(column); margin-top:20px;
-        input[type=text] { width:100%; .commonInput(); }
+        input[type=text],input[type=number],input[type=tel] { width:100%; .commonInput(); }
         input:disabled { color:#999; }
         // .button { position:absolute; right:0; top:0; height:40px; }
         .group { 
@@ -301,10 +301,10 @@
           <p>如果这不是您的手机号，请在天气宝公众号留言联系客服</p>
         </template>
         <template v-else>
-          <input type="text" placeholder="您的手机号" v-model.trim="orderInfo.mobile" />
+          <input type="tel" placeholder="您的手机号" v-model.trim="orderInfo.mobile" />
           <div class="group">
             <div class="inner-wrapper iw1">
-              <input type="text" placeholder="获取验证码" v-model.trim="orderInfo.vfCode" />
+              <input type="number" placeholder="获取验证码" v-model.trim="orderInfo.vfCode" />
             </div>
             <div class="inner-wrapper iw2">
               <input type="button" 
