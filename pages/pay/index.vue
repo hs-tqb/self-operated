@@ -351,7 +351,7 @@
       <div class="outer-wrapper">
         <div id="city-search-box">
           <a href="javascript:void(0)" @click="citySelectorDialog.show=false">&lt;</a>
-          <input type="text" :value="citySelectorDialog.keyword" @input="searchCity">
+          <input type="text" :value="citySelectorDialog.keyword" placeholder="城市搜索" @input="searchCity">
         </div>
         <!-- 搜索 -->
         <template v-if="citySelectorDialog.keyword.length">
