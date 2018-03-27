@@ -612,7 +612,7 @@ export default {
     },
     // 合约
     computedPayout() {
-      return parseInt(this.contractInfo.payoutFee * this.orderInfo.quantity);
+      return parseInt(this.contractInfo.payoutFee * this.orderInfo.quantity /100 );
     },
     computedPrice() {
       return this.contractInfo.price/100;
@@ -659,7 +659,7 @@ export default {
       } else {
         return;
       }
-      this.animateNumber('payout',  parseInt(this.contractInfo.payoutFee * this.orderInfo.quantity) );
+      this.animateNumber('payout',  parseInt(this.contractInfo.payoutFee * this.orderInfo.quantity /100) );
     },
     sendSMSVFCode() {
       let mobile = this.orderInfo.mobile
@@ -780,7 +780,7 @@ export default {
         this.contractInfo = resp.data;
         // console.log(resp.data.payoutFee * this.orderInfo.quantity / 100)
         
-        this.animateNumber('payout', parseInt(resp.data.payoutFee * this.orderInfo.quantity));
+        this.animateNumber('payout', parseInt(resp.data.payoutFee * this.orderInfo.quantity / 100));
         this.animateNumber('threshold', resp.data.threshold);
       })
     },
