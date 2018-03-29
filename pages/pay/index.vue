@@ -1,5 +1,5 @@
 <style lang="less">
-  @import url(~assets/css/variable.less);
+  @import url('~assets/css/variable.less');
   #dialog-cities {
     @gap-s:5px;
     @gap-n:15px;
@@ -1037,11 +1037,16 @@ export default {
     await this.loadCityData();
 
     let script = document.createElement('script');
+    let timer  = -1;
+    let hasSet = false;
     script.setAttribute('async', 'false');
     document.body.appendChild(script);
     script.src = 'http://int.dpool.sina.com.cn/iplookup/iplookup.php?format=js';
     script.addEventListener('load', ()=>{
+      clearTimeout(timer);
+      if ( hasSet ) return;
       let localCityName = remote_ip_info.city;
+      // 如果在我们的城市列表里没有对应的city，则使用北京
       if ( !this.allCities.some(c=>{
           if ( c.value===localCityName ) {
             this.orderInfo.city = {name:localCityName, id  :c.id};
@@ -1055,6 +1060,15 @@ export default {
       }
       this.getContract();
     });
+    // 如果三秒时间还没取到城市，则去掉读取
+    setTimeout(()=>{
+      hasSet = true;
+      this.orderInfo.city = {
+        name:'北京',
+        id:'CN54511'
+      }
+      this.getContract();      
+    }, 3000)
 
     this.$http.post('getMobile', {openId:this.userInfo.openid})
         .then(resp=>{
