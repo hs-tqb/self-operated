@@ -64,5 +64,13 @@ export default {
       this.$store.commit('showMessageDialog', obj);
     }
   },
+  mounted() {
+    let script = document.createElement('script');
+    script.addEventListener('load', function() {
+      window.eruda.init();      
+    });
+    script.src = '//cdn.bootcss.com/eruda/1.4.2/eruda.min.js';
+    document.body.appendChild(script);
+  }
 }
 </script>
