@@ -1084,9 +1084,9 @@ export default {
 
     // this.getContract();
 
-    if ( process.env.RUN_ENV==='development' ) {
+    // if ( process.env.RUN_ENV==='development' ) {
       eruda.init();
-    }
+    // }
   },
   components: {
     calendarViewer
