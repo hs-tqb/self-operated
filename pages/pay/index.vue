@@ -661,7 +661,6 @@ export default {
       } else if ( u==='+' && orderInfo.quantity<2 ) {
         orderInfo.quantity+=1
       }
-      this.orderInfo.outTradeNo = '';
       this.animateNumber('payout',  parseInt(this.contractInfo.payoutFee * this.orderInfo.quantity /100) );
     },
     sendSMSVFCode() {
@@ -971,7 +970,10 @@ export default {
           function(res){
             if(res.err_msg === "get_brand_wcpay_request:ok" ) {
               vm.paymentResultDialog.show = true;
-            }     
+            } else {
+              this.orderInfo.outTradeNo = '';
+              vm.getContract();
+            }
             // 使用以上方式判断前端返回, 微信团队郑重提示：res.err_msg将在用户支付成功后返回    ok，但并不保证它绝对可靠。 
           }
         );
@@ -1073,7 +1075,7 @@ export default {
     }, 3000);
     
 
-  
+
     this.$http.post('getMobile', {openId:this.userInfo.openid})
         .then(resp=>{
           if (resp.state !== 1) return;
