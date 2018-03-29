@@ -8,7 +8,7 @@ let config = {
     // baseURL: 'http://192.168.1.159:8008/'
   },
   production: {
-    baseURL: 'http://web.baotianqi.cn/'
+    baseURL: 'http://api.selfrain.baotianqi.cn/'
   }
 }
 
