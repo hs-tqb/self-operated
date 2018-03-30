@@ -28,7 +28,14 @@
     h3 { padding:0 @gap-n; line-height:26px; background-color:@color-border-lighter; }
     #city-search-box {
       .flow(); .align(stretch); padding:10px 20px 10px 0;
-      a { width:60px; line-height:30px; text-align:center; font-size:20px; font-weight:bold; }
+      a { 
+        .relative; width:60px; 
+        line-height:30px; text-align:center; font-size:20px; font-weight:bold; 
+        @l:22px;
+        &::before,&::after { position:absolute; top:8px; width:14px; height:14px; content:'\200B'; transform:rotate(45deg); .radius(2px); }
+        &::before { left:@l; background:@color-text-secondary; }
+        &::after  { left:@l+3px; background:#fff; }
+      }
       input { width:100%; .commonInput(); height:30px; }
     }
     #hot-cities {
@@ -353,7 +360,7 @@
     <div id="dialog-cities" class="dialog-container" :class="citySelectorDialog.show?'show':''">
       <div class="outer-wrapper">
         <div id="city-search-box">
-          <a href="javascript:void(0)" @click="citySelectorDialog.show=false">&lt;</a>
+          <a href="javascript:void(0)" @click="citySelectorDialog.show=false"></a>
           <input type="text" :value="citySelectorDialog.keyword" placeholder="城市搜索" @input="searchCity">
         </div>
         <!-- 搜索 -->
@@ -563,7 +570,7 @@ export default {
       },
       // 选择器
       citySelectorDialog: {
-        show:false,
+        show:true,
         // show:true,
         searching:false,
         keyword:'',
