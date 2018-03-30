@@ -1,15 +1,17 @@
 <style lang="less">
   @import url(~assets/css/variable.less);
+  @block-height:14.2857vw;
   #comp-calendar {
     .bgc(#fff);
     .flex-dir-row { .flow(row); }
     .flex-1 { .flex(1); }
     .cal-month { background:#fff; }
     .cal-month-title { 
-      line-height:60px; background:#fff; 
+      line-height:@block-height; background:#fff; 
+      color:@color-text-primary;
     }
     // .cal-week { height:107px; }
-    .cal-week-title { line-height:56px; text-align:center; border-bottom:2px solid #eee; }
+    .cal-week-title { line-height:56px; text-align:center; border-bottom:2px solid #eee; color:@color-text-primary; }
 
     .cal-month { border-bottom:1px solid #eee; } 
     .cal-week-title,
@@ -26,11 +28,11 @@
 
     .cal-day.suffix { background-color:#eee; } 
 
-    .cal-day .text { line-height:57px; }
+    .cal-day .text { line-height:@block-height; }
     .cal-day .city { padding:0 0px; line-height:22px; }
 
     /* 选择 */
-    .cal-day.selected { background:#fd5e47; color:#fff; }
+    .cal-day.selected { background:@color-primary; color:#fff; }
 
 
     /* 操作栏 */
@@ -72,7 +74,7 @@
     <div id="content">
       <!--  -->
       <div class="cal-month-list" v-for="(month,mi) in monthList" :key="`m${mi}`">
-        <div class="cal-month-title text-danger text-l text-center">
+        <div class="cal-month-title text-l text-center">
           <span>{{month.date.year}} 年 {{month.date.month<10?'0':''}}{{month.date.month+1}} 月</span>
         </div>
         <div class="cal-month text-center">

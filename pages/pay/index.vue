@@ -15,6 +15,8 @@
         &.show { opacity:1; }
       }
     }
+    @p:#72c0fc;
+    .selected { background-color:@p; color:#fff; border-color:@p!important; }
     .inner-wrapper {
       position:relative;
       background-color:#fff;
@@ -48,9 +50,9 @@
     .search-wrapper,
     #all-cities {
       .list { 
-        padding:0 @gap-n; 
+        // padding:0 @gap-n; 
         li { 
-          padding:@gap-n 0; 
+          padding:@gap-n; 
           &:not(:last-child) { border-bottom:1px solid @color-border-base; }
         }
       }
@@ -370,7 +372,7 @@
                 <li 
                   v-for="(c,i) in searchedCities" :key="`scsc${i}`" 
                   @click.stop="selectCity(c)"
-                  :class="c.id===orderInfo.city.id?'text-primary':''"
+                  :class="c.id===orderInfo.city.id?'selected':''"
                 >
                   {{c.name}}
                 </li>
@@ -385,7 +387,7 @@
               <ul class="list">
                 <li 
                   v-for="(c,i) in hotCities" :key="`hc${i}`" 
-                  :class="c.id===orderInfo.city.id?'text-primary':''"
+                  :class="c.id===orderInfo.city.id?'selected':''"
                   @click.stop="selectCity(c)">
                   {{c.name}}
                 </li>
@@ -397,7 +399,7 @@
                 <ul class="list" :key="`acl${i}`">
                   <li 
                     v-for="(c,j) in s.data" :key="`acc${j}`" 
-                    :class="c.id===orderInfo.city.id?'text-primary':''"
+                    :class="c.id===orderInfo.city.id?'selected':''"
                     @click.stop="selectCity(c)"
                   >
                     {{c.name}}
@@ -570,7 +572,7 @@ export default {
       },
       // 选择器
       citySelectorDialog: {
-        show:true,
+        show:false,
         // show:true,
         searching:false,
         keyword:'',
