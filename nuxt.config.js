@@ -30,6 +30,11 @@ module.exports = {
   /*
   ** Add axios globally
   */
+  router: {
+    middleware: [
+      'wechatBrowserOnly'
+    ],
+  },
   env: {
     RUN_ENV:process.env.RUN_ENV
   },
