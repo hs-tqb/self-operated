@@ -458,7 +458,7 @@
             <img src="~/assets/img/icons/success-bg.png" width="50">
             <h3 class="text-primary">购买成功</h3>
             <h3 class="text-danger">共支付 {{computedPayFee}}元</h3>
-            <p class="tips">保障期结束后次日，天气宝自动获取来自气象局的天气数据，判定合约是否触发。判定合约触发后，保障红包将在3个工作内转账到您的微信账户中。</p>
+            <p class="tips">保障期结束后两个工作日内，天气宝自动获取来自气象局的天气数据，判定合约是否触发。判定合约触发后，保障红包将在3个工作内转账到您的微信账户中。</p>
           </div>
           <img src="~/assets/img/icons/border.jpg" alt="" class="border">
           <div class="panel info">
