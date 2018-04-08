@@ -365,8 +365,19 @@ export default {
           this.showTips       = 'valid';
           this.orderable      = true;
         } else if (this.selections.length) {
-          this.showTips = 'discontinuity';
-          this.orderable = false;
+          // this.showTips = 'discontinuity';
+          // this.orderable = false;
+          if ( dayObj.selected ) {
+            this.makeContinuity();
+            this.orderDateStart = this.getShortDate(this.selections[0]);
+            this.orderDateEnd   = this.getShortDate(this.selections[this.selections.length-1]);
+            this.orderDateCount = this.selections.length;
+            this.showTips       = 'valid';
+            this.orderable      = true;
+          } else {
+            this.showTips = 'discontinuity';
+            this.orderable = false;
+          }
         }
       }
 
