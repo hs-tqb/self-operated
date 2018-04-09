@@ -254,13 +254,13 @@
     </div> -->
     <div id="bg-lay">
       <div 
-        :class="contractInfo.threshold>15?'show':''" 
+        :class="contractInfo.threshold>20?'show':''" 
         :style="`background-image:url(${bgs[2]});`"></div>
       <div 
-        :class="contractInfo.threshold>5&&contractInfo.threshold<=15?'show':''" 
+        :class="contractInfo.threshold>10&&contractInfo.threshold<=20?'show':''" 
         :style="`background-image:url(${bgs[1]});`"></div>
       <div 
-        :class="contractInfo.threshold<=5?'show':''" 
+        :class="contractInfo.threshold<=10?'show':''" 
         :style="`background-image:url(${bgs[0]});`"></div>
     </div>
     <div id="options" class="panel">
